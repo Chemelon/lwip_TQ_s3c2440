@@ -1,21 +1,7 @@
-/* WOTCH DOG register */
-#define WTCON (*(volatile unsigned long *)0x53000000)
-
-/* SDRAM regisers */
-#define MEM_CTL_BASE 0x48000000
-
-/*clock registers*/
-#define LOCKTIME (*(volatile unsigned long *)0x4c000000)
-#define MPLLCON (*(volatile unsigned long *)0x4c000004)
-#define UPLLCON (*(volatile unsigned long *)0x4c000008)
-#define CLKCON (*(volatile unsigned long *)0x4c00000c)
-#define CLKSLOW (*(volatile unsigned long *)0x4c000010)
-#define CLKDIVN (*(volatile unsigned long *)0x4c000014)
+#include "s3c24xx.h"
 
 #define S3C2410_MPLL_200MHZ ((0x5c << 12) | (0x04 << 4) | (0x00))
 #define S3C2440_MPLL_200MHZ ((0x5c << 12) | (0x01 << 4) | (0x02))
-
-#define GSTATUS1 (*(volatile unsigned long *)0x560000B0)
 
 void disable_watch_dog(void);
 void memsetup(void);
