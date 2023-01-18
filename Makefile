@@ -22,7 +22,7 @@ TARGET = lwip
 # debug build?
 DEBUG = 1
 # optimization
-OPT = -Og
+OPT = -O0
 
 
 #######################################
@@ -38,17 +38,18 @@ BUILD_DIR = build
 C_SOURCES =  \
 2440bsp/main.c \
 2440bsp/start.c \
-2440bsp/usart.c
+2440bsp/usart.c \
+2440bsp/nand.c \
 
 # ASM sources
 ASM_SOURCES =  \
-2440bsp/startup.s
+2440bsp/start2.s
 
 
 #######################################
 # binaries
 #######################################
-PREFIX = arm-none-eabi-
+PREFIX = arm-linux-
 # The gcc compiler bin path can be either defined in make command via GCC_PATH variable (> make GCC_PATH=xxx)
 # either it can be added to the PATH environment variable.
 ifdef GCC_PATH
@@ -78,7 +79,7 @@ CPU = -mcpu=arm920t
 
 
 # mcu
-MCU = $(CPU) -marm $(FPU) $(FLOAT-ABI)
+MCU = $(CPU) $(FPU) $(FLOAT-ABI)
 
 # macros for gcc
 # AS defines
@@ -118,9 +119,9 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = lwip.ld
 
 # libraries
-LIBS = -lc -lm -lnosys 
+LIBS = -lc -lm
 LIBDIR = 
-LDFLAGS = $(MCU) -specs=nano.specs -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -nostartfiles
+LDFLAGS = $(MCU)-T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -nostartfiles
 # default action: build all
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 

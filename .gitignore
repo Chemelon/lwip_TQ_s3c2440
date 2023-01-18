@@ -1,5 +1,6 @@
 *.zip
 *.back
+*.sh
 .vscode/
 .cache/
 build/

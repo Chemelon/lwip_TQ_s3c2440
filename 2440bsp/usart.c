@@ -1,6 +1,6 @@
 #include "usart.h"
 #include "s3c24xx.h"
-#include <stdio.h>
+
 #define TXD0READY (1 << 2)
 #define RXD0READY (1)
 #define PCLK 50000000         // init.c中的clock_init函数设置PCLK为50MHz
@@ -24,6 +24,15 @@ void uart0_init(void)
 /*
  * 发送一个字符
  */
+void uart0_sendbyte(uint8_t data)
+{
+      /* 等待，直到发送缓冲区中的数据已经全部发送出去 */
+    while (!(UTRSTAT0 & TXD0READY))
+      ;
+    /* 向UTXH0寄存器中写入数据，UART即自动将它发送出去 */
+    UTXH0 = data;
+}
+
 int _write(int fd, char *ptr, int len)
 {
   int temp = len;
@@ -36,6 +45,14 @@ int _write(int fd, char *ptr, int len)
     UTXH0 = *ptr++;
   }
   return temp;
+}
+
+void puts(char * str)
+{
+   while (*str)
+   {
+      uart0_sendbyte(*str++);
+   }
 }
 /*
  * 接收字符
@@ -69,4 +86,18 @@ int isLetter(unsigned char c)
     return 1;
   else
     return 0;
+}
+
+void puthex(unsigned int val)
+{
+    int i, j;
+    puts("0x");
+    for (i = 0; i < 8; i++)
+    {
+        j = (val >> ((7 - i) * 4)) & 0x0f;
+        if ((j >= 0) && (j <= 9))
+            uart0_sendbyte('0' + j);
+        else
+            uart0_sendbyte('A' + j - 0x0a);
+    }
 }
