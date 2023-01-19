@@ -6,7 +6,16 @@
 .text
 .global _start
 _start:
+    b __reset_handler
+    b __undif_handler
+    b __soft_handler
+    b __prefetch_handler
+    b __data_handler
+    b _start @Reserved
+    b __irq_handler
+    b __fiq_handler
 
+__reset_handler:
 /*关看门狗*/
     ldr r0, =0x53000000 @WTCON
     mov r1, #0
@@ -31,6 +40,8 @@ _start:
 /*开启 icache*/
     mrc p15, 0, r0, c1, c0, 0
     orr r0, r0, #1<<12
+/* enable dcache */
+    orr r0, r0, #1<<2
     mcr p15, 0, r0, c1, c0, 0
 
     @ 检查是否在ram中运行
@@ -87,6 +98,13 @@ ___main:
 /*执行main*/
     ldr lr, =halt
     ldr pc, =main
+
+__start:
+__undif_handler:
+__soft_handler:
+__prefetch_handler:
+__data_handler:
+__fiq_handler:
 halt:
     b halt
 

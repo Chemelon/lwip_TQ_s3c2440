@@ -47,7 +47,7 @@ int _write(int fd, char *ptr, int len)
   return temp;
 }
 
-void puts(char * str)
+void myputs(char * str)
 {
    while (*str)
    {
@@ -91,7 +91,7 @@ int isLetter(unsigned char c)
 void puthex(unsigned int val)
 {
     int i, j;
-    puts("0x");
+    myputs("0x");
     for (i = 0; i < 8; i++)
     {
         j = (val >> ((7 - i) * 4)) & 0x0f;

@@ -8,13 +8,6 @@
 #define GPB7_out (1 << (7 * 2))
 #define GPB8_out (1 << (8 * 2))
 
-static inline uint32_t get_cp15(void)
-{
-        __asm__(
-            "mrc    p15, 0, r0, c1, c0, 0\n" /* 读出控制寄存器 */
-        );
-}
-
 int main(void)
 {
     // printf("hello,world!");
@@ -31,9 +24,15 @@ int main(void)
         }
         GPBDAT = (GPBDAT & (1 << 5)) ? (GPBDAT & ~(1 << 5)) : (GPBDAT | (1 << 5));
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
-        puts("\r\n");
-        puthex(get_cp15());
+        myputs("hello world!\r\n");
     }
 
     return 0;
+}
+
+void __irq_handler(void)
+{
+
+
+    
 }
