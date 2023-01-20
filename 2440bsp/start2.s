@@ -4,7 +4,7 @@
 .equ        S3C2440_MPLL_400MHZ,     ((0x5c<<12)|(0x01<<4)|(0x01))
 .equ        MEM_CTL_BASE,             0x48000000
 
-.text
+.section .isr_vector,"a",%progbits
 .global _start
 _start:
 
@@ -22,6 +22,7 @@ _start:
     /* 如果HDIVN非0，CPU的总线模式应该从“fast bus mode”变为“asynchronous bus mode” */
     mrc p15, 0, r0, c1, c0, 0        /* 读出控制寄存器 */ 
     orr r0, r0, #0xc0000000          /* 设置为“asynchronous bus mode” */
+    /* dcache 需要mmu启动,所以裸机状态下就不要使用了 */
     mcr p15, 0, r0, c1, c0, 0        /* 写入控制寄存器 */
 
     /*MPLLCON = S3C2440_MPLL_400MHZ*/
@@ -33,14 +34,6 @@ _start:
     mrc p15, 0, r0, c1, c0, 0
     orr r0, r0, #1<<12
     mcr p15, 0, r0, c1, c0, 0
-
-    @ 检查是否在ram中运行
-    ldr r0, =0x30000000
-    ldr r1, =0x12345678
-    str r1, [r0]
-    ldr r2, [r0]
-    cmp r1, r2
-    beq ___main
 
 /*初始化SDRAM*/
     mov r1,     #MEM_CTL_BASE       @ 存储控制器的13个寄存器的开始地址
@@ -84,7 +77,7 @@ _start:
     ldr r1, = 0x00000000    @ LED1 LED2 on 不响证明拷贝完毕
     str r1, [r0]
 /************************************************/
-___main:
+
 /*执行main*/
     ldr lr, =halt
     ldr pc, =main

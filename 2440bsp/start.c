@@ -67,6 +67,9 @@ void memsetup()
     p[i] = mem_cfg_val[i];
 }
 #endif
+void copy_code_to_sdram(unsigned int src, unsigned char *target, unsigned int len) __attribute__ ((section(".startup_code")));
+void clean_bss(void) __attribute__ ((section(".startup_code")));
+
 void copy_code_to_sdram(unsigned int src, unsigned char *target, unsigned int len)
 {
   nand_read(src, target, len);

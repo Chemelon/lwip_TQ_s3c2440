@@ -1,7 +1,6 @@
 /* Entry Point */
 ENTRY(_start)
 
-
 /* Generate a link error if heap and stack don't fit into RAM */
 _Min_Heap_Size = 0x200;      /* required amount of heap  */
 _Min_Stack_Size = 0x400; /* required amount of stack */
@@ -20,11 +19,16 @@ SECTIONS
   {
     . = ALIGN(4);
     KEEP(*(.isr_vector)) /* Startup code */
-    *start.o
-    *nand.o
     . = ALIGN(4);
   } >FLASH
 
+  .startup_code :
+  {
+    /* 将nand的操作函数前置 */
+    . = ALIGN(4);
+    *(.startup_code)
+    . = ALIGN(4);
+  }
   /* The program code and other data goes into FLASH */
   .text :
   {

@@ -95,7 +95,7 @@ AS_INCLUDES =
 
 # C includes
 C_INCLUDES = \
--I2440bsp
+-I2440bsp/include
 
 
 # compile gcc flags

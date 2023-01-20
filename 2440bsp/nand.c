@@ -1,4 +1,12 @@
 #include "s3c24xx.h"
+void nand_select(void) __attribute__ ((section(".startup_code")));
+void nand_deselect(void) __attribute__ ((section(".startup_code")));
+void nand_cmd(unsigned char cmd) __attribute__ ((section(".startup_code")));
+void nand_addr(unsigned int addr) __attribute__ ((section(".startup_code")));
+void nand_wait_ready(void) __attribute__ ((section(".startup_code")));
+unsigned char nand_data(void) __attribute__ ((section(".startup_code")));
+void nand_init(void) __attribute__ ((section(".startup_code")));
+void nand_read(unsigned int addr, unsigned char *buf, unsigned int len) __attribute__ ((section(".startup_code")));
 
 void nand_select(void)
 {
