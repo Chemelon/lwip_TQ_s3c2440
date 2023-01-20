@@ -125,7 +125,7 @@ C_INCLUDES = \
 -Ilwip-1.4.1/src/include \
 -Ilwip-1.4.1/src/include/arch \
 -Ilwip-1.4.1/src/include/ipv4 \
--I2440bsp
+-I2440bsp/include
 
 
 # compile gcc flags

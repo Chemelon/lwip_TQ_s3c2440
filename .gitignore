@@ -1,5 +1,5 @@
 *.zip
-*.back
+*.back*
 *.sh
 TQ2440-DM9000-LWIP1.4.1-WEB/
 .vscode/

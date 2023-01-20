@@ -14,7 +14,7 @@
 
 /* 无系统 */
 #define NO_SYS 1
-#define NO_SYS_NO_TIMERS             1
+#define NO_SYS_NO_TIMERS 1
 
 #define LWIP_SOCKET 0
 #define LWIP_NETCONN 0
@@ -44,4 +44,3 @@
 #define MEMP_NUM_SYS_TIMEOUT 10
 
 #endif /* __LWIPOPTS_H__ */
-
