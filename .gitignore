@@ -1,5 +1,5 @@
 *.zip
-*.back
+*.back*
 *.sh
 .vscode/
 .cache/

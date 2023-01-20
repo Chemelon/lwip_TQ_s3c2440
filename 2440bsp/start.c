@@ -74,9 +74,9 @@ void copy_code_to_sdram(unsigned int src, unsigned char *target, unsigned int le
 
 void clean_bss(void)
 {
-  extern int __bss_start, __bss_end;
-  int *p = &__bss_start;
+  extern int __bss_start__, __bss_end__;
+  int *p = &__bss_start__;
 
-  for (; p < &__bss_end; p++)
+  for (; p < &__bss_end__; p++)
     *p = 0;
 }

@@ -3,6 +3,7 @@
 .equ        S3C2440_MPLL_200MHZ,     ((0x5c<<12)|(0x01<<4)|(0x02))
 .equ        S3C2440_MPLL_400MHZ,     ((0x5c<<12)|(0x01<<4)|(0x01))
 .equ        MEM_CTL_BASE,             0x48000000
+
 .text
 .global _start
 _start:
@@ -72,7 +73,7 @@ _start:
 
     mov r0, #0
     ldr r1, =_start
-    ldr r2, =__bss_start
+    ldr r2, =__bss_start__
     sub r2, r2, r1
 
     bl copy_code_to_sdram
