@@ -1,5 +1,6 @@
 #include "s3c24xx.h"
 #include "usart.h"
+#include <stdio.h>
 /*
  * LED1-4对应GPB5、GPB6、GPB7、GPB8
  */
@@ -25,7 +26,7 @@ int main(void)
         }
         GPBDAT = (GPBDAT & (1 << 5)) ? (GPBDAT & ~(1 << 5)) : (GPBDAT | (1 << 5));
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
+        printf("hello\r\n");
     }
-
     return 0;
 }

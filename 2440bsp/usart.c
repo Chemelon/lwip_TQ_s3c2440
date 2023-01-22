@@ -1,5 +1,6 @@
 #include "usart.h"
 #include "s3c24xx.h"
+#include <stdio.h>
 
 #define TXD0READY (1 << 2)
 #define RXD0READY (1)
@@ -47,13 +48,13 @@ int _write(int fd, char *ptr, int len)
   return temp;
 }
 
-void puts(char * str)
-{
-   while (*str)
-   {
-      uart0_sendbyte(*str++);
-   }
-}
+// void puts(char * str)
+// {
+//    while (*str)
+//    {
+//       uart0_sendbyte(*str++);
+//    }
+// }
 /*
  * 接收字符
  */

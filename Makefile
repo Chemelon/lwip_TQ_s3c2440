@@ -149,7 +149,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 LDSCRIPT = lwip.ld
 
 # libraries
-LIBS = -lc -lm
+LIBS = -lc -lm -lnosys
 LIBDIR = 
 LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections -nostartfiles
 # default action: build all

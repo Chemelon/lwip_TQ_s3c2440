@@ -1,6 +1,8 @@
 *.zip
 *.back*
 *.sh
+*.json
+*.dis
 .vscode/
 .cache/
 build/
