@@ -3,5 +3,5 @@ mon reset halt
 flushregs
 load
 flushregs
-thb _start
+thb main
 c
