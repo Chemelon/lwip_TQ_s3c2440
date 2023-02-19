@@ -18,11 +18,22 @@ typedef unsigned int mem_ptr_t;
 #define PACK_STRUCT_END
 
 #define LWIP_DEBUG
-#define LWIP_PLATFORM_DIAG(x)
+#define LWIP_PLATFORM_DIAG(x)                                                  \
+  { printf x; }
+#define LWIP_PLATFORM_ASSERT(x)                                                \
+  {                                                                            \
+    printf(x);                                                                 \
+    while (1)                                                                  \
+      ;                                                                        \
+  }
 
-#define LWIP_PLATFORM_ASSERT(x)
-
-#define LWIP_ERROR(message, expression, handler)
+#define LWIP_ERROR(message, expression, handler)                               \
+  do {                                                                         \
+    if (!(expression)) {                                                       \
+      printf(message);                                                         \
+      handler;                                                                 \
+    }                                                                          \
+  } while (0)
 
 //#define LWIP_NOASSERT
 //#define LWIP_ASSERT(x,y)
@@ -38,7 +49,10 @@ typedef unsigned int mem_ptr_t;
 
 #define LWIP_PROVIDE_ERRNO
 
+#if LITTLE_ENDIAN != LITTLE_ENDIAN
+#undef LITTLE_ENDIAN
 #define BYTE_ORDER LITTLE_ENDIAN
+#endif
 
 extern unsigned int sys_now(void);
 

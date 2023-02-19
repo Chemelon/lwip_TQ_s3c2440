@@ -3,6 +3,8 @@
 *.sh
 *.json
 *.dis
+.clang-format
+gdbinit
 .vscode/
 .cache/
 build/

@@ -92,7 +92,7 @@ int isLetter(unsigned char c)
 void puthex(unsigned int val)
 {
     int i, j;
-    puts("0x");
+    _write(0,"0x",2);
     for (i = 0; i < 8; i++)
     {
         j = (val >> ((7 - i) * 4)) & 0x0f;

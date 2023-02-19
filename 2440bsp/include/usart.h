@@ -1,5 +1,6 @@
 #ifndef __USART_H
 #define __USART_H
+#include <stdio.h>
 
 
 void uart0_init(void);

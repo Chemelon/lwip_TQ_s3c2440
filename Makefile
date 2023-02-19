@@ -63,6 +63,7 @@ lwip-1.4.1/src/core/ipv4/ip.c \
 lwip-1.4.1/src/netif/etharp.c \
 lwip-1.4.1/src/netif/ethernetif.c \
 lwip-1.4.1/src/netif/slipif.c \
+\
 2440bsp/main.c \
 2440bsp/start.c \
 2440bsp/usart.c \
@@ -125,13 +126,14 @@ C_INCLUDES = \
 -Ilwip-1.4.1/src/include \
 -Ilwip-1.4.1/src/include/arch \
 -Ilwip-1.4.1/src/include/ipv4 \
+\
 -I2440bsp/include
 
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
-CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -fno-builtin -std=gnu99
+CFLAGS += $(MCU) $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections -std=gnu99
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -g -gdwarf-2
