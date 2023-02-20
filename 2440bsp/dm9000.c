@@ -19,34 +19,40 @@ void dm9k_io_init(void)
 {
     /* 内存控制器初始化 */
 #define B4_Tacs 0x0 /*  0clk */
-#define B4_Tcos 0x0 /*  3clk */
+#define B4_Tcos 0x3 /*  4clk */
 #define B4_Tacc 0x7 /* 14clk */
 #define B4_Tcoh 0x1 /*  1clk */
 #define B4_Tah  0x0 /*  0clk */
-#define B4_Tacp 0x0 /*  6clk */
+#define B4_Tacp 0x3 /*  6clk */
 #define B4_PMC  0x0 /* normal */
-    /* BANK2 */
-    MEM_CTL->BWSCON &= ~(0x07 << 8);
-    MEM_CTL->BWSCON |= (0x01 << 8);
-    MEM_CTL->BANKCON2 = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) | (B4_Tah << 4) |
+    /* BANK4 */
+    MEM_CTL->BWSCON &= ~(0x0f << 16);
+    MEM_CTL->BWSCON |= (0x05 << 16);
+    MEM_CTL->BANKCON4 = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) | (B4_Tah << 4) |
                          (B4_Tacp << 2) | (B4_PMC << 0));
+
+    //*((volatile unsigned long *)0x48000000) &= ~(0x0f << 16);
+    /* 总线16位 使能nWAIT */
+    //*((volatile unsigned long *)0x48000000) |= (0x05 << 16);
+    //*((volatile unsigned long *)0x48000014) = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) |
+    //                                           (B4_Tah << 4) | (B4_Tacp << 2) | (B4_PMC << 0));
     /* 中断初始化 EINT7 */
     // 设置引脚复用为为中断
-    GPFCON &= ~(0x3 << 14);
-    GPFCON |= 0x2 << 14;
+    // GPFCON &= ~(0x3 << 14);
+    // GPFCON |= 0x2 << 14;
 
     // 设置中断触发方式
-    EXTI->EXTINT0 &= ~(0x7 << 28);
-    EXTI->EXTINT0 |= 0x1 << 28; /* 设置EINT7的信号触发方式，高电平 */
+    // EXTI->EXTINT0 &= ~(0x7 << 28);
+    /// EXTI->EXTINT0 |= 0x1 << 28; /* 设置EINT7的信号触发方式，高电平 */
 
     // 中断清除
-    EINTPEND |= 1 << 7;    /* 向相应位置写1清除次级源挂起寄存器 */
-    SRCPND |= BIT_EINT4_7; /* 向相应位置写1清除源挂起寄存器 */
-    INTPND |= BIT_EINT4_7; /* 向相应位置写1清除挂起寄存器 */
+    // INTPEND |= 1 << 7;    /* 向相应位置写1清除次级源挂起寄存器 */
+    // SRCPND |= BIT_EINT4_7; /* 向相应位置写1清除源挂起寄存器 */
+    // INTPND |= BIT_EINT4_7; /* 向相应位置写1清除挂起寄存器 */
 
     // 使能中断
-    EINTMASK &= ~(1 << 7);  /* 关闭外部中断屏蔽 */
-    INTMSK &= ~BIT_EINT4_7; /* 关闭EINT4~7中断屏蔽，总中断  */
+    // EINTMASK &= ~(1 << 7);  /* 关闭外部中断屏蔽 */
+    // INTMSK &= ~BIT_EINT4_7; /* 关闭EINT4~7中断屏蔽，总中断  */
 }
 
 /**************************************************************************
@@ -54,7 +60,7 @@ void dm9k_io_init(void)
  *  Function  :  dm9000 芯片复位
  *
  *************************************************************************/
-uint8_t dm9k_reset()
+void dm9k_reset()
 {
     // 设置GPIO控制寄存器  GPIO0设置为输出
     dm9k_WR(DM9000_GPCR, DM9000_GPCR_GPIO0_OUT);
@@ -118,7 +124,7 @@ void dm9k_fill_macadd()
     /* read back mac, just to be sure */
     for (i = 0; i < 6; i++)
     {
-        printf("%02x:\r\n", dm9k_RD(DM9000_PAB0 + i));
+        printf("%02x\r\n", dm9k_RD(DM9000_PAB0 + i));
     }
 }
 
@@ -148,9 +154,45 @@ int dm9k_probe()
     }
     else
     {
-        printf("dm9000 is not found!\r\n");
+        printf("dm9000 is not found! id=%x\r\n", id_val);
         return -1;
     }
+}
+
+void delay(uint32_t nms)
+{
+    for(int i =0 ;i<nms;i++)
+    {
+        for(int j=0 ;j<1000;j++)
+        {}
+    }
+}
+
+void dm_init(void)
+{
+    dm9k_WR(DM9000_NCR, 1); //软件复位DM9000
+    delay(300);              //延时至少20μs
+    dm9k_WR(DM9000_NCR, 0); //清除复位位
+
+    dm9k_WR(DM9000_NCR, 1); //为了确保复位正确，再次复位
+    delay(300);
+    dm9k_WR(DM9000_NCR, 0);
+
+    dm9k_WR(DM9000_GPCR, 1); //设置GPIO0为输出
+    dm9k_WR(DM9000_GPR, 0);  //激活内部PHY
+
+    dm9k_WR(DM9000_NSR, 0x2c); //清TX状态
+    dm9k_WR(DM9000_ISR, 0xf);  //清中断状态
+
+    dm9k_WR(DM9000_RCR, 0x39); //设置RX控制
+    dm9k_WR(DM9000_TCR, 0);    //设置TX控制
+    dm9k_WR(DM9000_BPTR, 0x3f);
+    dm9k_WR(DM9000_FCTR, 0x3a);
+    dm9k_WR(DM9000_FCR, 0xff);
+    dm9k_WR(DM9000_SMCR, 0x00);
+
+    dm9k_WR(DM9000_NSR, 0x2c); //再次清TX状态
+    dm9k_WR(DM9000_ISR, 0xf);  //再次清中断状态
 }
 
 int dm9k_init(void)
@@ -159,11 +201,13 @@ int dm9k_init(void)
     dm9k_io_init();
 
     /* 芯片重置 */
-    dm9k_reset();
+    dm_init();
+    /* TODO:这个函数初始化顺序有点问题 待修改 */
+    //dm9k_reset();
 
     /* 芯片捕获 */
     if (dm9k_probe() != 0)
-        return -1;
+        return 1;
 
     /* MAC初始化 */
     dm9k_mac_init();
@@ -172,8 +216,10 @@ int dm9k_init(void)
     dm9k_fill_macadd();
 
     /* 启动DM9000，这里如果加入RCR_ALL意为接受广播数据，会造成接收数据异常 */
-    dm9k_WR(DM9000_RCR, RCR_DIS_LONG | RCR_DIS_CRC | RCR_RXEN);
+    dm9k_WR(DM9000_RCR, DM9000_RCR_DIS_LONG | DM9000_RCR_DIS_CRC | DM9000_RCR_RXEN);
 
     /* Enable TX/RX interrupt mask */
-    dm9k_WR(DM9000_IMR, IMR_PAR);
+    dm9k_WR(DM9000_IMR, DM9000_IMR_PAR);
+
+    return 0;
 }

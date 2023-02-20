@@ -1,9 +1,11 @@
-
-#define _SYS__STDINT_H
-
 typedef unsigned long uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
+
+typedef uint32_t u32;
+typedef uint16_t u16;
+typedef uint8_t u8 ;
+
 typedef struct 
 {
     volatile uint32_t BWSCON;

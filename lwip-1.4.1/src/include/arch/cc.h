@@ -18,8 +18,10 @@ typedef unsigned int mem_ptr_t;
 #define PACK_STRUCT_END
 
 #define LWIP_DEBUG
+
 #define LWIP_PLATFORM_DIAG(x)                                                  \
   { printf x; }
+
 #define LWIP_PLATFORM_ASSERT(x)                                                \
   {                                                                            \
     printf(x);                                                                 \
@@ -35,8 +37,6 @@ typedef unsigned int mem_ptr_t;
     }                                                                          \
   } while (0)
 
-//#define LWIP_NOASSERT
-//#define LWIP_ASSERT(x,y)
 
 #define U16_F "u"
 #define S16_F "d"
@@ -59,7 +59,7 @@ extern unsigned int sys_now(void);
 //* 临界代码保护宏
 //#define	SYS_ARCH_DECL_PROTECT(x)	    //u32_t cpu_sr
 //#define	SYS_ARCH_PROTECT(x)			    //cpu_sr =
-// DisableInt()//OS_ENTER_CRITICAL() #define	SYS_ARCH_UNPROTECT(x)
-////EnableInt(cpu_sr)     //OS_EXIT_CRITICAL()
+//DisableInt()//OS_ENTER_CRITICAL() #define	SYS_ARCH_UNPROTECT(x)
+//EnableInt(cpu_sr)     //OS_EXIT_CRITICAL()
 
 #endif /* __CC_H */

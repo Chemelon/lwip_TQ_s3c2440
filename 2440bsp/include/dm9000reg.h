@@ -1,6 +1,6 @@
 #ifndef __DM9000REG_H
 #define __DM9000REG_H
-#define DM9000_ID                   0x2B2A0A46
+#define DM9000_ID                   0x90000a46
 #define DM9000_IOSIZE               4 /* XXX: Depends on the wiring of the address lines. */
 #define DM9000_NCR                  0x00
 #define DM9000_NCR_RST              (1 << 0)

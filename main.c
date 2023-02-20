@@ -1,6 +1,6 @@
+#include "dm9000.h"
 #include "s3c24xx.h"
 #include "usart.h"
-#include <stdio.h>
 /*
  * LED1-4对应GPB5、GPB6、GPB7、GPB8
  */
@@ -16,6 +16,7 @@ int main(void)
     // LED1-LED4对应的4根引脚设为输出
     uart0_init();
     GPBCON = GPB5_out | GPB6_out | GPB7_out | GPB8_out;
+    dm9k_init();
     while (1)
     {
         for (int i = 0; i < 1000; i++)
