@@ -30,29 +30,24 @@ void dm9k_io_init(void)
     MEM_CTL->BWSCON |= (0x05 << 16);
     MEM_CTL->BANKCON4 = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) | (B4_Tah << 4) |
                          (B4_Tacp << 2) | (B4_PMC << 0));
-
-    //*((volatile unsigned long *)0x48000000) &= ~(0x0f << 16);
-    /* 总线16位 使能nWAIT */
-    //*((volatile unsigned long *)0x48000000) |= (0x05 << 16);
-    //*((volatile unsigned long *)0x48000014) = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) |
-    //                                           (B4_Tah << 4) | (B4_Tacp << 2) | (B4_PMC << 0));
+                         
     /* 中断初始化 EINT7 */
     // 设置引脚复用为为中断
-    // GPFCON &= ~(0x3 << 14);
-    // GPFCON |= 0x2 << 14;
+    GPFCON &= ~(0x3 << 14);
+    GPFCON |= 0x2 << 14;
 
     // 设置中断触发方式
-    // EXTI->EXTINT0 &= ~(0x7 << 28);
-    /// EXTI->EXTINT0 |= 0x1 << 28; /* 设置EINT7的信号触发方式，高电平 */
+    EXTI->EXTINT0 &= ~(0x7 << 28);
+    EXTI->EXTINT0 |= 0x1 << 28; /* 设置EINT7的信号触发方式，高电平 */
 
     // 中断清除
-    // INTPEND |= 1 << 7;    /* 向相应位置写1清除次级源挂起寄存器 */
-    // SRCPND |= BIT_EINT4_7; /* 向相应位置写1清除源挂起寄存器 */
-    // INTPND |= BIT_EINT4_7; /* 向相应位置写1清除挂起寄存器 */
+    EXTI->EINTPEND |= 1 << 7;    /* 向相应位置写1清除次级源挂起寄存器 */
+    SRCPND |= BIT_EINT4_7; /* 向相应位置写1清除源挂起寄存器 */
+    INTPND |= BIT_EINT4_7; /* 向相应位置写1清除挂起寄存器 */
 
     // 使能中断
-    // EINTMASK &= ~(1 << 7);  /* 关闭外部中断屏蔽 */
-    // INTMSK &= ~BIT_EINT4_7; /* 关闭EINT4~7中断屏蔽，总中断  */
+    EXTI->EINTMASK &= ~(1 << 7);  /* 关闭外部中断屏蔽 */
+    INTMSK &= ~BIT_EINT4_7; /* 关闭EINT4~7中断屏蔽，总中断  */
 }
 
 /**************************************************************************

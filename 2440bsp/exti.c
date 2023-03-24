@@ -16,20 +16,34 @@ void exti_init(void)
     INTMSK &= ~(0x00000017);
 }
 
-void exti0_handler(void) {
+void exti0_handler(void)
+{
     EXTI->EINTPEND |= 0x01 << 0;
     printf("exti0\r\n");
-    
 }
-void exti1_handler(void) {
+
+void exti1_handler(void)
+{
     EXTI->EINTPEND |= 0x01 << 1;
     printf("exti1\r\n");
 }
-void exti2_handler(void) {
+
+void exti2_handler(void)
+{
     EXTI->EINTPEND |= 0x01 << 2;
     printf("exti2\r\n");
 }
-void exti4_7_handler(void) {
-    EXTI->EINTPEND |= 0x01 << 4;
-    printf("exti4\r\n");
+
+void exti4_7_handler(void)
+{
+    if (EXTI->EINTPEND & (0x01 << 4))
+    {
+        EXTI->EINTPEND |= 0x01 << 4;
+        printf("exti4\r\n");
+    }
+    else if (EXTI->EINTPEND & (0x01 << 7))
+    {
+        EXTI->EINTPEND |= 0x01 << 4;
+        printf("exti7\r\n");
+    }
 }
