@@ -49,8 +49,7 @@ typedef unsigned int mem_ptr_t;
 
 #define LWIP_PROVIDE_ERRNO
 
-#if LITTLE_ENDIAN != LITTLE_ENDIAN
-#undef LITTLE_ENDIAN
+#ifndef BYTE_ORDER
 #define BYTE_ORDER LITTLE_ENDIAN
 #endif
 

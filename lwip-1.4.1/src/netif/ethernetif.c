@@ -6,9 +6,9 @@
 
 /*
  * Copyright (c) 2001-2004 Swedish Institute of Computer Science.
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -17,21 +17,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission. 
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- * 
+ *
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
@@ -43,17 +43,19 @@
  * something that better describes your network interface.
  */
 
-#include "lwip/opt.h"
-
-#if 0 /* don't build, this is only a skeleton, see previous comment */
-
 #include "lwip/def.h"
 #include "lwip/mem.h"
+#include "lwip/netif.h"
+#include "lwip/opt.h"
 #include "lwip/pbuf.h"
-#include <lwip/stats.h>
-#include <lwip/snmp.h>
 #include "netif/etharp.h"
 #include "netif/ppp_oe.h"
+#include <lwip/snmp.h>
+#include <lwip/stats.h>
+
+struct netif dm9k_netif;
+
+#if 0 /* don't build, this is only a skeleton, see previous comment */
 
 /* Define those to better describe your network interface. */
 #define IFNAME0 'e'
@@ -126,7 +128,7 @@ low_level_output(struct netif *netif, struct pbuf *p)
   struct pbuf *q;
 
   initiate transfer();
-  
+
 #if ETH_PAD_SIZE
   pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
@@ -315,3 +317,17 @@ ethernetif_init(struct netif *netif)
 }
 
 #endif /* 0 */
+
+void dm9k_netif_init(void)
+{
+    struct ip_addr ipaddr, netmask, gw;
+
+    IP4_ADDR(&gw, 192, 168, 123, 1);
+    IP4_ADDR(&ipaddr, 192, 168, 123, 200);
+    IP4_ADDR(&netmask, 255, 255, 255, 0);
+    //extern err_t ethernetif_init(struct netif * netif);
+    //netif_add(&dm9k_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, ethernet_input);
+
+    netif_set_default(&dm9k_netif);
+    netif_set_up(&dm9k_netif);
+}

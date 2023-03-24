@@ -7,7 +7,22 @@
 .section .isr_vector,"a",%progbits
 .global _start
 _start:
+    b reset
+HandleUndef:
+    b HandleUndef
+HandleSWI:
+    b HandleSWI
+HandlePrefetchAbort:
+    b HandlePrefetchAbort
+HandleDataAbort:
+    b HandleDataAbort
+HandleNotUsed:
+    b HandleNotUsed
+    b HandleIRQ
+HandleFIQ:
+    b HandleFIQ
 
+reset:
 /*关看门狗*/
     ldr r0, =0x53000000 @WTCON
     mov r1, #0
@@ -46,6 +61,7 @@ _start:
     bne 1b                          @ 若没有写成，继续
 
 /************************************************/
+    @ 对sdram读写测试sdram是否成功初始化
     ldr r0, = 0x56000010    @ GPBCON
     ldr r1, = 0x00015401    @ GPB0 GPB5 GPB6 OUT
     ldr r2, = 0x30000000
@@ -56,9 +72,13 @@ _start:
     ldr r0, = 0x56000014    @ GPBDAT
     ldr r1, = 0x000001E1    @ LED1 LED2 OFF 响证明sdram没问题
     str r1, [r0]
+/************************************************/
+@ 设置中断函数栈指针
+    msr cpsr_c, #0xd2       @ 进入中断模式
+    ldr sp, =4096
+    msr cpsr_c, #0xdf       @ 进入系统模式
 
 /************************************************/
-
 /*重定位 把bootloader 从FLASH 复制到它的链接地址去*/
     ldr sp, =0x34000000     @ 设置栈
 
@@ -71,7 +91,6 @@ _start:
 
     bl copy_code_to_sdram
     bl clean_bss
-
 /************************************************/
     ldr r0, = 0x56000014    @ GPBDAT
     ldr r1, = 0x00000000    @ LED1 LED2 on 不响证明拷贝完毕
@@ -99,3 +118,13 @@ mem_cfg_val:
     .long   0x000000B1      @ BANKSIZE
     .long   0x00000030      @ MRSRB6
     .long   0x00000030      @ MRSRB7
+
+HandleIRQ:
+    sub lr, lr, #4 @ 计算返回地址
+    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
+                            @ 注意,此时sp是中断模式的sp
+                            @ 初始值是上面设置的3072
+    ldr lr, = int_return     @ 设置调用ISR即EINT_Handle函数后的返回地址
+    ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
+int_return:
+    ldmia sp!, {r0-r12,pc}^  @中断返回,^表示将spsr的值复制到cpsr

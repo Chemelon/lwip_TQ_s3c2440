@@ -68,6 +68,8 @@ lwip-1.4.1/src/netif/slipif.c \
 2440bsp/start.c \
 2440bsp/usart.c \
 2440bsp/nand.c \
+2440bsp/irq.c \
+2440bsp/exti.c \
 2440bsp/dm9000.c \
 
 

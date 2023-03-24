@@ -122,10 +122,12 @@ void dm9k_fill_macadd()
         dm9k_WR(DM9000_MAB0 + i, 0xff);
     }
     /* read back mac, just to be sure */
+    printf("mac read back: ");
     for (i = 0; i < 6; i++)
     {
-        printf("%02x\r\n", dm9k_RD(DM9000_PAB0 + i));
+        printf("%02x ", dm9k_RD(DM9000_PAB0 + i));
     }
+    printf("\r\n");
 }
 
 /**************************************************************************

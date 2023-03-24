@@ -49,6 +49,7 @@
 #define GPHCON (*(volatile unsigned long *)0x56000070)
 #define GPHDAT (*(volatile unsigned long *)0x56000074)
 #define GPHUP  (*(volatile unsigned long *)0x56000078)
+
 /* EXTI registers */
 #define EXTI_BASE 0x56000088
 #define EXTI ((exti_controller_type *)(EXTI_BASE))
@@ -82,8 +83,8 @@
 #define INTSUBMSK (*(volatile unsigned long *)0x4A00001c)
 
 /*external interrupt registers*/
-#define EINTMASK (*(volatile unsigned long *)0x560000a4)
-#define EINTPEND (*(volatile unsigned long *)0x560000a8)
+//#define EINTMASK (*(volatile unsigned long *)0x560000a4)
+//#define EINTPEND (*(volatile unsigned long *)0x560000a8)
 
 /*clock registers*/
 #define LOCKTIME (*(volatile unsigned long *)0x4c000000)

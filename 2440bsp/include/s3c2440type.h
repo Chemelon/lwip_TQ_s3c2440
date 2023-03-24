@@ -1,10 +1,11 @@
-typedef unsigned long uint32_t;
-typedef unsigned short uint16_t;
-typedef unsigned char uint8_t;
+#include "stdint.h"
+// typedef unsigned int uint32_t;
+// typedef unsigned short uint16_t;
+// typedef unsigned char uint8_t;
 
-typedef uint32_t u32;
-typedef uint16_t u16;
-typedef uint8_t u8 ;
+// typedef uint32_t u32;
+// typedef uint16_t u16;
+// typedef uint8_t u8 ;
 
 typedef struct 
 {
