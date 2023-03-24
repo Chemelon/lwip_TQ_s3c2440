@@ -52,7 +52,7 @@
 
 /* EXTI registers */
 #define EXTI_BASE 0x56000088
-#define EXTI ((exti_controller_type *)(EXTI_BASE))
+#define EXTI      ((exti_controller_type *)(EXTI_BASE))
 
 // ADC
 #define ADCCON  (*(volatile unsigned long *)0x58000000) // ADC control
@@ -95,12 +95,14 @@
 #define CLKDIVN  (*(volatile unsigned long *)0x4c000014)
 
 /*PWM & Timer registers*/
-#define TCFG0  (*(volatile unsigned long *)0x51000000)
-#define TCFG1  (*(volatile unsigned long *)0x51000004)
-#define TCON   (*(volatile unsigned long *)0x51000008)
-#define TCNTB0 (*(volatile unsigned long *)0x5100000c)
-#define TCMPB0 (*(volatile unsigned long *)0x51000010)
-#define TCNTO0 (*(volatile unsigned long *)0x51000014)
+#define TIMER_BASE 0x51000000
+#define TIMER      ((timer_controller_type *)(TIMER_BASE))
+// #define TCFG0  (*(volatile unsigned long *)0x51000000)
+// #define TCFG1  (*(volatile unsigned long *)0x51000004)
+// #define TCON   (*(volatile unsigned long *)0x51000008)
+// #define TCNTB0 (*(volatile unsigned long *)0x5100000c)
+// #define TCMPB0 (*(volatile unsigned long *)0x51000010)
+// #define TCNTO0 (*(volatile unsigned long *)0x51000014)
 
 /* I2C registers */
 #define IICCON  (*(volatile unsigned char *)0x54000000) // IIC control

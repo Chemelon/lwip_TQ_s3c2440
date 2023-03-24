@@ -30,7 +30,7 @@ void dm9k_io_init(void)
     MEM_CTL->BWSCON |= (0x05 << 16);
     MEM_CTL->BANKCON4 = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) | (B4_Tah << 4) |
                          (B4_Tacp << 2) | (B4_PMC << 0));
-                         
+
     /* 中断初始化 EINT7 */
     // 设置引脚复用为为中断
     GPFCON &= ~(0x3 << 14);
@@ -151,7 +151,7 @@ int dm9k_probe()
     }
     else
     {
-        printf("dm9000 is not found! id=%x\r\n", id_val);
+        printf("dm9000 is not found! id=%x\r\n", (unsigned int)id_val);
         return -1;
     }
 }

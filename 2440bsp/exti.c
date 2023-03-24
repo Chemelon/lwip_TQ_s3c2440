@@ -43,7 +43,7 @@ void exti4_7_handler(void)
     }
     else if (EXTI->EINTPEND & (0x01 << 7))
     {
-        EXTI->EINTPEND |= 0x01 << 4;
+        EXTI->EINTPEND |= 0x01 << 7;
         printf("exti7\r\n");
     }
 }
