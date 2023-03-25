@@ -14,7 +14,7 @@ void (*p_irqList[32])() = {exti0_handler, exti1_handler, exti2_handler, NULL, ex
                            NULL,          NULL,          NULL,          NULL, NULL,
                            NULL,          NULL};
 
-void irq_init(void) { __asm__ __volatile__("msr cpsr_c, #0x5f"); }
+void irq_init(void) { __asm__ __volatile__("msr cpsr_c, #0x5f \n"); }
 
 
 void irq_handle(void)

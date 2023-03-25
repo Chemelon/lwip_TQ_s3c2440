@@ -134,6 +134,8 @@ C_INCLUDES = \
 \
 -I2440bsp/include
 
+include FreeRTOS-Kernel/Makefile
+
 
 # compile gcc flags
 ASFLAGS = $(MCU) $(AS_DEFS) $(AS_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
