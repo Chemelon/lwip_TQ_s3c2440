@@ -54,6 +54,7 @@
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
+#include "s3c24xx.h"
 
 /* Constants required to handle interrupts. */
 #define portTIMER_MATCH_ISR_BIT		( ( uint8_t ) 0x01 )
@@ -96,7 +97,7 @@ void vPortYieldProcessor( void )
 	/* Within an IRQ ISR the link register has an offset from the true return
 	address, but an SWI ISR does not.  Add the offset manually so the same
 	ISR return code can be used in both cases. */
-	__asm volatile ( "ADD		LR, LR, #4" );
+	__asm__ volatile ( "ADD		LR, LR, #4" );
 
 	/* Perform the context switch.  First save the context of the current task. */
 	portSAVE_CONTEXT();
@@ -130,8 +131,10 @@ void vTickISR( void )
 	);
 
 	/* Ready for the next interrupt. */
-	T0_IR = portTIMER_MATCH_ISR_BIT;
-	VICVectAddr = portCLEAR_VIC_INTERRUPT;
+	/* 清除定时器4中断标志位 */
+	SRCPND = 1<<14;
+	//T0_IR = portTIMER_MATCH_ISR_BIT;
+	//VICVectAddr = portCLEAR_VIC_INTERRUPT;
 
 	/* Restore the context of the new task. */
 	portRESTORE_CONTEXT();

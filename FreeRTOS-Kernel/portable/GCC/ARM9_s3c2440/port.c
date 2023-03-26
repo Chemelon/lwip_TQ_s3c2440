@@ -42,6 +42,7 @@
 /* Scheduler includes. */
 #include "FreeRTOS.h"
 #include "task.h"
+#include "timer.h"
 
 /* Constants required to setup the task context. */
 #define portINITIAL_SPSR				( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
@@ -180,15 +181,15 @@ void vPortEndScheduler( void )
  */
 static void prvSetupTimerInterrupt( void )
 {
-uint32_t ulCompareMatch;
-extern void ( vTickISR )( void );
+//uint32_t ulCompareMatch;
+//extern void ( vTickISR )( void );
 
 	/* A 1ms tick does not require the use of the timer prescale.  This is
 	defaulted to zero but can be used if necessary. */
-	T0_PR = portPRESCALE_VALUE;
+	//T0_PR = portPRESCALE_VALUE;
 
 	/* Calculate the match value required for our wanted tick rate. */
-	ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
+	//ulCompareMatch = configCPU_CLOCK_HZ / configTICK_RATE_HZ;
 
 	/* Protect against divide by zero.  Using an if() statement still results
 	in a warning - hence the #if. */
@@ -197,24 +198,27 @@ extern void ( vTickISR )( void );
 		ulCompareMatch /= ( portPRESCALE_VALUE + 1 );
 	}
 	#endif
-	T0_MR0 = ulCompareMatch;
+	//T0_MR0 = ulCompareMatch;
 
 	/* Generate tick with timer 0 compare match. */
-	T0_MCR = portRESET_COUNT_ON_MATCH | portINTERRUPT_ON_MATCH;
+	//T0_MCR = portRESET_COUNT_ON_MATCH | portINTERRUPT_ON_MATCH;
 
 	/* Setup the VIC for the timer. */
-	VICIntSelect &= ~( portTIMER_VIC_CHANNEL_BIT );
-	VICIntEnable |= portTIMER_VIC_CHANNEL_BIT;
+	//VICIntSelect &= ~( portTIMER_VIC_CHANNEL_BIT );
+	//VICIntEnable |= portTIMER_VIC_CHANNEL_BIT;
 	
 	/* The ISR installed depends on whether the preemptive or cooperative
 	scheduler is being used. */
 
-	VICVectAddr0 = ( int32_t ) vTickISR;
-	VICVectCntl0 = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
+	//VICVectAddr0 = ( int32_t ) vTickISR;
+	//VICVectCntl0 = portTIMER_VIC_CHANNEL | portTIMER_VIC_ENABLE;
 
 	/* Start the timer - interrupts are disabled when this function is called
 	so it is okay to do this here. */
-	T0_TCR = portENABLE_TIMER;
+	//T0_TCR = portENABLE_TIMER;
+
+	/* 初始化2440的定时器4 */
+	tim4_init();
 }
 /*-----------------------------------------------------------*/
 

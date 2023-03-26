@@ -19,6 +19,8 @@ void tim4_init(void)
     TIMER->TCON &= ~(1 << 21);
     /* 开启中断 */
     INTMSK &= ~(1 << 14);
+    /* 设置为FIQ */
+    INTMOD |= 1<<14;
     /* 开启定时器 */
     TIMER->TCON |= 1 << 20;
 }
@@ -26,7 +28,9 @@ void tim4_init(void)
 void tim4_handler(void)
 {
     uwTick += 1;
-    //printf("timer irq\r\n");
+    /* FIQ 不影响INTOFFSET */
+    //SRCPND = 1 << 14;
+    // printf("timer irq\r\n");
 }
 
 
@@ -40,7 +44,7 @@ uint32_t HAL_GetTick(void) { return uwTick; }
  * @param Delay specifies the delay time length, in milliseconds.
  * @retval None
  */
- #define HAL_MAX_DELAY      0xFFFFFFFFU
+#define HAL_MAX_DELAY 0xFFFFFFFFU
 void HAL_Delay(uint32_t Delay)
 {
     uint32_t tickstart = HAL_GetTick();

@@ -10,17 +10,20 @@ _start:
     b reset
 HandleUndef:
     b HandleUndef
+@ 处理FreeRTOS软件中断请求
 HandleSWI:
-    b HandleSWI
+    b vPortYieldProcessor
 HandlePrefetchAbort:
     b HandlePrefetchAbort
 HandleDataAbort:
     b HandleDataAbort
 HandleNotUsed:
     b HandleNotUsed
+
     b HandleIRQ
-HandleFIQ:
-    b HandleFIQ
+
+@ 调用FreeRTOS的中断函数 切换上下文
+    b vTickISR
 
 reset:
 /*关看门狗*/
@@ -124,7 +127,20 @@ HandleIRQ:
     stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
                             @ 注意,此时sp是中断模式的sp
                             @ 初始值是上面设置的3072
-    ldr lr, = int_return     @ 设置调用ISR即EINT_Handle函数后的返回地址
+    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
     ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
+
+HandleFIQ:
+    sub lr, lr, #4 @ 计算返回地址
+    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
+                            @ 注意,此时sp是中断模式的sp
+                            @ 初始值是上面设置的3072
+    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
+    ldr pc, = fiq_handle    @ 调用中断服务函数,在irq.c中
+
 int_return:
     ldmia sp!, {r0-r12,pc}^  @中断返回,^表示将spsr的值复制到cpsr
+
+
+
+
