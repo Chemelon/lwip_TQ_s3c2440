@@ -53,7 +53,7 @@ int main(void)
 
     uart0_init();
     exti_init();
-    //tim4_init();
+    tim0_init();
     //irq_init();
 
     dm9k_init();
@@ -80,7 +80,7 @@ int main(void)
 
     while (1)
     {
-        //HAL_Delay(1000);
+        HAL_Delay(1000);
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
     }
     return 0;

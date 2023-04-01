@@ -8,7 +8,7 @@ void tim4_init(void)
 {
     /* PCLK = 50Mhz */
     /* 50分频 计数周期1us devider 默认为2分频*/
-    TIMER->TCFG0 |= 24 << 8;
+    TIMER->TCFG0 |= ((50 / 2) -1) << 8;
 
     TIMER->TCON |= 1 << 22;
 
@@ -25,7 +25,36 @@ void tim4_init(void)
     TIMER->TCON |= 1 << 20;
 }
 
+void tim0_init(void)
+{
+    /* 分频器 50分频 TIM0 TIM1 */
+    TIMER->TCFG0 = ((50 / 2) - 1) << 0;
+    /* auto reload */
+    TIMER->TCON |= 1 << 3;
+
+    TIMER->TCNTB0 = 1000;
+    /* mannul update */
+    TIMER->TCON |= 1 << 1;
+
+    TIMER->TCON &= ~(1 << 1);
+
+    /* 开启中断 */
+    INTMSK &= ~(1 << 10);
+
+    /* 开启定时器 */
+    TIMER->TCON |= 1 << 0;
+}
+
 void tim4_handler(void)
+{
+    uwTick += 1;
+    /* FIQ 不影响INTOFFSET */
+    //SRCPND = 1 << 14;
+    // printf("timer irq\r\n");
+}
+
+/* TODO: 系统调度的时候会屏蔽中断,那么计时将不准确*/ 
+void tim0_handler(void)
 {
     uwTick += 1;
     /* FIQ 不影响INTOFFSET */

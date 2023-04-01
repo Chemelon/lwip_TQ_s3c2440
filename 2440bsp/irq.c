@@ -8,7 +8,7 @@
 
 void (*p_irqList[32])() = {exti0_handler, exti1_handler, exti2_handler, NULL, exti4_7_handler,
                            NULL,          NULL,          NULL,          NULL, NULL,
-                           NULL,          NULL,          NULL,          NULL, tim4_handler,
+                           tim0_handler,          NULL,          NULL,          NULL, tim4_handler,
                            NULL,          NULL,          NULL,          NULL, NULL,
                            NULL,          NULL,          NULL,          NULL, NULL,
                            NULL,          NULL,          NULL,          NULL, NULL,
@@ -30,7 +30,7 @@ void irq_handle(void)
 {
     // uint32_t irqNumber = ffs(INTPND) - 1;
     uint32_t irqNumber = INTOFFSET;
-    printf("IRQ%d ", (int)irqNumber);
+    //printf("IRQ%d ", (int)irqNumber);
 
     /* 根据偏移量从数组中调用对应中断服务函数 */
     p_irqList[INTOFFSET]();
