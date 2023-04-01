@@ -45,6 +45,7 @@
 #include "timer.h"
 
 /* Constants required to setup the task context. */
+/* DEBUG: 参见vTaskStartScheduler() 之前关闭了中断,在这里重新启动 */
 #define portINITIAL_SPSR				( ( StackType_t ) 0x1f ) /* System mode, ARM mode, interrupts enabled. */
 #define portTHUMB_MODE_BIT				( ( StackType_t ) 0x20 )
 #define portINSTRUCTION_SIZE			( ( StackType_t ) 4 )

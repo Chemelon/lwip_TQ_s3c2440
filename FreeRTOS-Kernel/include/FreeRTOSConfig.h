@@ -67,7 +67,7 @@ your application. */
 /* Memory allocation related definitions. */
 #define configSUPPORT_STATIC_ALLOCATION             0
 #define configSUPPORT_DYNAMIC_ALLOCATION            1
-#define configTOTAL_HEAP_SIZE                       10240
+#define configTOTAL_HEAP_SIZE                       (1024 * 1024)
 #define configAPPLICATION_ALLOCATED_HEAP            0
 #define configSTACK_ALLOCATION_FROM_SEPARATE_HEAP   0
 
@@ -135,5 +135,6 @@ your application. */
 #define INCLUDE_xTaskResumeFromISR              1
 
 /* A header file that defines trace macro can be included here. */
+#define configRECORD_STACK_HIGH_ADDRESS 1
 
 #endif /* FREERTOS_CONFIG_H */

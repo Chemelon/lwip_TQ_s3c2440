@@ -11,8 +11,8 @@ _start:
 HandleUndef:
     b HandleUndef
 @ 处理FreeRTOS软件中断请求
-HandleSWI:
-    b vPortYieldProcessor
+@ HandleSWI:
+    b HandleSWI
 HandlePrefetchAbort:
     b HandlePrefetchAbort
 HandleDataAbort:
@@ -23,7 +23,31 @@ HandleNotUsed:
     b HandleIRQ
 
 @ 调用FreeRTOS的中断函数 切换上下文
-    b vTickISR
+    b HandleFIQ
+
+HandleIRQ:
+    sub lr, lr, #4 @ 计算返回地址
+    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
+                            @ 注意,此时sp是中断模式的sp
+                            @ 初始值是上面设置的3072
+    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
+    ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
+
+HandleFIQ:
+    ldr pc, = vTickISR
+@ 直接跳转到FreeRTOS的函数中,不会执行下面的代码
+    sub lr, lr, #4 @ 计算返回地址
+    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
+                            @ 注意,此时sp是中断模式的sp
+                            @ 初始值是上面设置的3072
+    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
+    ldr pc, = fiq_handle    @ 调用中断服务函数,在irq.c中
+
+HandleSWI:
+    ldr pc, = vPortYieldProcessor
+
+int_return:
+    ldmia sp!, {r0-r12,pc}^  @中断返回,^表示将spsr的值复制到cpsr
 
 reset:
 /*关看门狗*/
@@ -79,6 +103,10 @@ reset:
 @ 设置中断函数栈指针
     msr cpsr_c, #0xd2       @ 进入中断模式
     ldr sp, =4096
+    msr cpsr_c, #0xd1       @ 进入快中断模式
+    ldr sp, =4096
+    msr cpsr_c, #0xd3       @ 进入管理模式
+    ldr sp, =4096
     msr cpsr_c, #0xdf       @ 进入系统模式
 
 /************************************************/
@@ -122,24 +150,8 @@ mem_cfg_val:
     .long   0x00000030      @ MRSRB6
     .long   0x00000030      @ MRSRB7
 
-HandleIRQ:
-    sub lr, lr, #4 @ 计算返回地址
-    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
-                            @ 注意,此时sp是中断模式的sp
-                            @ 初始值是上面设置的3072
-    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
-    ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
 
-HandleFIQ:
-    sub lr, lr, #4 @ 计算返回地址
-    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
-                            @ 注意,此时sp是中断模式的sp
-                            @ 初始值是上面设置的3072
-    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
-    ldr pc, = fiq_handle    @ 调用中断服务函数,在irq.c中
 
-int_return:
-    ldmia sp!, {r0-r12,pc}^  @中断返回,^表示将spsr的值复制到cpsr
 
 
 
