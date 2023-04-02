@@ -105,13 +105,17 @@ LIBDIR =
 
 LDFLAGS = $(MCU) -T$(LDSCRIPT) $(LIBDIR) $(LIBS) -Wl,-Map=$(BUILD_DIR)/$(TARGET).map,--cref -Wl,--gc-sections -nostartfiles
 
-# default action: build all
-all: $(SUB_DIRS)
+OBJ_FILES =
 
-$(BUILD_DIR)/$(TARGET).elf: | $(BUILD_DIR)
-	@echo "SUB_DIRS = $(SUB_DIRS)"
-	$(eval OBJ_FILES = $(wildcard 2440bsp/build/*.o))
-	@echo "OBJ_FILES = $(OBJ_FILES)"
+# default action: build all
+all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
+
+$(BUILD_DIR)/$(TARGET).elf: compile
+# @echo "SUB_DIRS = $(SUB_DIRS)"
+# @echo "$(foreach dir,$(SUB_DIRS),$(wildcard $(dir)/build/*))"
+# TODO:这段话之前不能有任何语句否则$(OBJ_FILES)为空,原因未知,凑合用
+	$(eval OBJ_FILES += $(foreach dir,$(SUB_DIRS),$(wildcard $(dir)/build/*.o*)))
+# @echo "OBJ_FILES = $(OBJ_FILES)"
 	$(CC) $(OBJ_FILES) $(LDFLAGS) -o $@
 	$(SZ) $@
 	$(PREFIX)objdump -D -m arm $(BUILD_DIR)/$(TARGET).elf > $(BUILD_DIR)/$(TARGET).dis
@@ -122,11 +126,12 @@ $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(BIN) $< $@
 
-$(SUB_DIRS):ECHO
-	make -C $@
-
 $(BUILD_DIR):
-	mkdir $@	
+	mkdir $@
+
+.PHONY: compile
+compile:
+	for dir in $(SUB_DIRS); do $(MAKE) -C $$dir; done
 
 #######################################
 # clean up

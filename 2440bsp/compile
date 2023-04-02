@@ -1,0 +1,13 @@
+build/timer.o: timer.c \
+ /home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/timer.h \
+ /home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/s3c24xx.h \
+ /home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/s3c2440type.h \
+ /home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/s3c24xx.h
+
+/home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/timer.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/s3c24xx.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/s3c2440type.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/2440bsp/include/s3c24xx.h:
