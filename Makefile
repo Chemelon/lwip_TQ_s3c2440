@@ -119,6 +119,8 @@ $(BUILD_DIR)/$(TARGET).elf: compile
 	$(CC) $(OBJ_FILES) $(LDFLAGS) -o $@
 	$(SZ) $@
 	$(PREFIX)objdump -D -m arm $(BUILD_DIR)/$(TARGET).elf > $(BUILD_DIR)/$(TARGET).dis
+# TODO:产生一个叫compile的文件,不知道原因,在这里删除
+	$(foreach dir,$(SUB_DIRS),$(shell rm $(dir)/compile))
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(HEX) $< $@
