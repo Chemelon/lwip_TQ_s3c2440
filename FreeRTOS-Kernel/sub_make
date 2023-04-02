@@ -1,0 +1,28 @@
+build/heap_4.o: portable/MemMang/heap_4.c \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/FreeRTOS.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/FreeRTOSConfig.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/projdefs.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/portable.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/deprecated_definitions.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/portable/GCC/ARM9_s3c2440/portmacro.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/mpu_wrappers.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/task.h \
+ /home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/list.h
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/FreeRTOS.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/FreeRTOSConfig.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/projdefs.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/portable.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/deprecated_definitions.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/portable/GCC/ARM9_s3c2440/portmacro.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/mpu_wrappers.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/task.h:
+
+/home/streleizia/workspace/baremetal/lwip_port/FreeRTOS-Kernel/include/list.h:

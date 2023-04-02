@@ -1,17 +1,53 @@
+#######################################
+# paths
+#######################################
+# Build path
+BUILD_DIR = build
+
+######################################
+# source
+######################################
+SRC_DIR = .
+
+# C sources
 # TODO: 缺少timers.c文件 与lwip中文件重名 待解决 croutine.c 和 stream_buffer.c 不知道干什么用的,先不添加
-C_SOURCES += \
-FreeRTOS-Kernel/event_groups.c \
-FreeRTOS-Kernel/list.c \
-FreeRTOS-Kernel/queue.c \
-FreeRTOS-Kernel/tasks.c \
-FreeRTOS-Kernel/timers.c \
+C_SOURCES = \
+event_groups.c \
+list.c \
+queue.c \
+tasks.c \
+timers.c \
 \
-FreeRTOS-Kernel/portable/GCC/ARM9_s3c2440/port.c \
-FreeRTOS-Kernel/portable/GCC/ARM9_s3c2440/portISR.c \
+portable/GCC/ARM9_s3c2440/port.c \
+portable/GCC/ARM9_s3c2440/portISR.c \
 \
-FreeRTOS-Kernel/portable/MemMang/heap_4.c
+portable/MemMang/heap_4.c
 
-C_INCLUDES += \
--IFreeRTOS-Kernel/include \
--IFreeRTOS-Kernel/portable/GCC/ARM9_s3c2440
 
+# ASM sources
+ASM_SOURCES =
+
+#######################################
+# build the application
+#######################################
+# list of objects
+OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
+vpath %.c $(sort $(dir $(C_SOURCES)))
+# list of ASM program objects
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+vpath %.s $(sort $(dir $(ASM_SOURCES)))
+
+all: $(OBJECTS)
+
+$(BUILD_DIR)/%.o: %.c | $(BUILD_DIR) 
+	$(CC) -c $(CFLAGS) -Wa,-a,-ad,-alms=$(BUILD_DIR)/$(notdir $(<:.c=.lst)) $< -o $@
+	
+$(BUILD_DIR)/%.o: %.s | $(BUILD_DIR)
+	$(AS) -c $(CFLAGS) $< -o $@
+
+$(BUILD_DIR):
+	mkdir $@
+
+.PHONY: clean
+clean:
+	-rm -fR $(BUILD_DIR)
