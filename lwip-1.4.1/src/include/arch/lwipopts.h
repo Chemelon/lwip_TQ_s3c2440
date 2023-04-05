@@ -18,20 +18,21 @@
 #define TCP_SND_BUF 4000 //允许TCP协议使用的最大发送缓冲长度
 #define TCP_MSS     1000
 
-#define LWIP_DBG_MIN_LEVEL LWIP_DBG_LEVEL_WARNING
+#define LWIP_DBG_MIN_LEVEL LWIP_DBG_LEVEL_ALL
 
 #define ETH_PAD_SIZE 0
 #define ETHARP_DEBUG LWIP_DBG_ON
-#define ICMP_DEBUG   LWIP_DBG_ON
+#define ICMP_DEBUG   LWIP_DBG_OFF
 
 //#define LWIP_HAVE_LOOPIF 1
 
-#define MEM_DEBUG            LWIP_DBG_ON
-#define MEMP_DEBUG           LWIP_DBG_ON
-#define RAW_DEBUG            LWIP_DBG_ON
-#define IP_DEBUG             LWIP_DBG_ON
-#define TCP_DEBUG            LWIP_DBG_ON
-#define UDP_DEBUG            LWIP_DBG_ON
+#define MEM_DEBUG  LWIP_DBG_OFF
+#define MEMP_DEBUG LWIP_DBG_OFF
+#define RAW_DEBUG  LWIP_DBG_OFF
+#define IP_DEBUG   LWIP_DBG_OFF
+#define TCP_DEBUG  LWIP_DBG_OFF
+#define UDP_DEBUG  LWIP_DBG_OFF
+#define PBUF_DEBUG LWIP_DBG_OFF
 // #define MEMP_MEM_MALLOC      1
 // #define MEM_USE_POOLS        0
 

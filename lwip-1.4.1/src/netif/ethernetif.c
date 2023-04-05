@@ -82,7 +82,8 @@ struct ethernetif
 };
 
 /* Forward declarations. */
-// static void ethernetif_input(struct netif *netif);
+err_t ethernetif_init(struct netif *netif);
+void ethernetif_input(struct netif *netif);
 
 /**
  * In this function, the hardware should be initialized.
@@ -102,9 +103,9 @@ static void low_level_init(struct netif *netif)
     netif->hwaddr[0] = 0x00;
     netif->hwaddr[1] = 0x01;
     netif->hwaddr[2] = 0x02;
-    netif->hwaddr[3] = 0x0c;
-    netif->hwaddr[4] = 0x0b;
-    netif->hwaddr[5] = 0x0a;
+    netif->hwaddr[3] = 0x0f;
+    netif->hwaddr[4] = 0x03;
+    netif->hwaddr[5] = 0x0d;
 
     /* maximum transfer unit */
     netif->mtu = 1500;
@@ -134,10 +135,20 @@ static void low_level_init(struct netif *netif)
  *       dropped because of memory failure (except for the TCP timers).
  */
 
+void my_cpy(uint8_t *src, uint8_t *dst, uint32_t len)
+{
+    for (; len > 0; len--)
+    {
+        *(volatile uint8_t *)dst++ = *(volatile uint8_t *)src++;
+    }
+}
+
+volatile uint8_t eth_tx_buff[2000] = {0};
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
     // struct ethernetif *ethernetif = netif->state;
     struct pbuf *q;
+    uint32_t offset = 0;
 
     // initiate transfer();
 
@@ -150,9 +161,11 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
         /* Send the data from the pbuf to the interface, one pbuf at a
            time. The size of the data in each pbuf is kept in the ->len
            variable. */
-        eth_send(q->payload, q->len);
+        my_cpy(q->payload,(eth_tx_buff + offset),q->len);
+        offset += q->len;
         // send data from(q->payload, q->len);
     }
+    eth_send(eth_tx_buff,p->tot_len);
 
     // signal that packet should be sent();
 
@@ -173,14 +186,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
  * @return a pbuf filled with the received packet (including MAC header)
  *         NULL on memory error
  */
-
-void my_cpy(uint8_t *src, uint8_t *dst, uint32_t len)
-{
-    for (; len > 0; len--)
-    {
-        *(volatile uint8_t *)dst++ = *(volatile uint8_t *)src++;
-    }
-}
 
 static struct pbuf *low_level_input(struct netif *netif)
 {
@@ -206,30 +211,31 @@ static struct pbuf *low_level_input(struct netif *netif)
 #if ETH_PAD_SIZE
         pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
-        extern volatile uint8_t *NetRxPackets[4]; /* Receive packets			*/
+
         /* We iterate over the pbuf chain until we have read the entire
          * packet into the pbuf. */
-        for (q = p; q != NULL; q = q->next)
+        extern volatile uint8_t *NetRxPackets[4]; /* Receive packets			*/
+        if (len > p->len)
         {
-            /* Read enough bytes to fill this pbuf in the chain. The
-             * available data in the pbuf is given by the q->len
-             * variable.
-             * This does not necessarily have to be a memcpy, you can also preallocate
-             * pbufs for a DMA-enabled MAC and after receiving truncate it to the
-             * actually received size. In this case, ensure the tot_len member of the
-             * pbuf is the sum of the chained pbuf len members.
-             */
-            // read data into(q->payload, q->len);
-            if (len / q->len)
+            /* 分配了多个pbuf */
+            for (q = p; q != NULL; q = q->next)
             {
-                my_cpy((NetRxPackets[0] + offset), q->payload, q->len);
-                len -= q->len;
+                /* Read enough bytes to fill this pbuf in the chain. The
+                 * available data in the pbuf is given by the q->len
+                 * variable.
+                 * This does not necessarily have to be a memcpy, you can also preallocate
+                 * pbufs for a DMA-enabled MAC and after receiving truncate it to the
+                 * actually received size. In this case, ensure the tot_len member of the
+                 * pbuf is the sum of the chained pbuf len members.
+                 */
+                // read data into(q->payload, q->len);
+                my_cpy((NetRxPackets[0]+offset),q->payload,q->len);
                 offset += q->len;
             }
-            else
-            {
-                my_cpy((NetRxPackets[0] + offset), q->payload, len);
-            }
+        }
+        else {
+            /* 只分配了一个pbuf */
+            my_cpy(NetRxPackets[0],p->payload,len);
         }
         // acknowledge that packet has been read();
 
@@ -314,16 +320,16 @@ void ethernetif_input(struct netif *netif)
  */
 err_t ethernetif_init(struct netif *netif)
 {
-    struct ethernetif *ethernetif;
+    // struct ethernetif *ethernetif;
 
     LWIP_ASSERT("netif != NULL", (netif != NULL));
 
-    ethernetif = mem_malloc(sizeof(struct ethernetif));
-    if (ethernetif == NULL)
-    {
-        LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_init: out of memory\n"));
-        return ERR_MEM;
-    }
+    // ethernetif = mem_malloc(sizeof(struct ethernetif));
+    // if (ethernetif == NULL)
+    // {
+    //     LWIP_DEBUGF(NETIF_DEBUG, ("ethernetif_init: out of memory\n"));
+    //     return ERR_MEM;
+    // }
 
 #if LWIP_NETIF_HOSTNAME
     /* Initialize interface hostname */
@@ -337,7 +343,7 @@ err_t ethernetif_init(struct netif *netif)
      */
     // NETIF_INIT_SNMP(netif, snmp_ifType_ethernet_csmacd, LINK_SPEED_OF_YOUR_NETIF_IN_BPS);
 
-    netif->state = ethernetif;
+    // netif->state = ethernetif;
     netif->name[0] = IFNAME0;
     netif->name[1] = IFNAME1;
     /* We directly use etharp_output() here to save a function call.
@@ -347,7 +353,7 @@ err_t ethernetif_init(struct netif *netif)
     netif->output = etharp_output;
     netif->linkoutput = low_level_output;
 
-    ethernetif->ethaddr = (struct eth_addr *)&(netif->hwaddr[0]);
+    // ethernetif->ethaddr = (struct eth_addr *)&(netif->hwaddr[0]);
 
     /* initialize the hardware */
     low_level_init(netif);
@@ -361,11 +367,10 @@ void dm9k_netif_init(void)
 {
     struct ip_addr ipaddr, netmask, gw;
 
-    IP4_ADDR(&gw, 192, 168, 123, 3);
+    IP4_ADDR(&gw, 192, 168, 123, 1);
     IP4_ADDR(&ipaddr, 192, 168, 123, 200);
     IP4_ADDR(&netmask, 255, 255, 255, 0);
 
-    extern err_t ethernet_input(struct pbuf * p, struct netif * netif);
     netif_add(&dm9k_netif, &ipaddr, &netmask, &gw, NULL, ethernetif_init, ethernet_input);
 
     netif_set_default(&dm9k_netif);

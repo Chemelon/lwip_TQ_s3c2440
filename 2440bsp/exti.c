@@ -1,4 +1,5 @@
 #include "exti.h"
+#include "dm9000.h"
 #include "s3c24xx.h"
 #include <stdio.h>
 
@@ -45,10 +46,8 @@ void exti4_7_handler(void)
     }
     else if (EXTI->EINTPEND & (0x01 << 7))
     {
+        //ethernetif_input(&dm9k_netif);
+        printf("exti7\r\n");
         EXTI->EINTPEND = 0x01 << 7;
-extern void ethernetif_input(struct netif *netif);
-extern struct netif dm9k_netif;
-        ethernetif_input(&dm9k_netif);
-        //printf("exti7\r\n");
     }
 }

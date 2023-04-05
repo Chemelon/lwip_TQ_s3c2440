@@ -1,8 +1,9 @@
-#include "dm9000x.h"
 #include "dm9000.h"
+#include "dm9000x.h"
 #include "s3c24xx.h"
 #include "timer.h"
 #include "usart.h"
+#include <stdio.h>
 #include <sys/_stdint.h>
 
 #define CONFIG_DM9000_BASE 0x20000300
@@ -75,6 +76,42 @@ void dump_regs(void)
 }
 #endif /*  */
 
+void dm9k_io_init(void)
+{
+    /* 内存控制器初始化 */
+#define B4_Tacs 0x0 /*  0clk */
+#define B4_Tcos 0x3 /*  4clk */
+#define B4_Tacc 0x7 /* 14clk */
+#define B4_Tcoh 0x1 /*  1clk */
+#define B4_Tah  0x0 /*  0clk */
+#define B4_Tacp 0x3 /*  6clk */
+#define B4_PMC  0x0 /* normal */
+    /* BANK4 */
+    MEM_CTL->BWSCON &= ~(0x0f << 16);
+    MEM_CTL->BWSCON |= (0x05 << 16);
+    MEM_CTL->BANKCON4 = ((B4_Tacs << 13) | (B4_Tcos << 11) | (B4_Tacc << 8) | (B4_Tcoh << 6) | (B4_Tah << 4) |
+                         (B4_Tacp << 2) | (B4_PMC << 0));
+
+    /* 中断初始化 EINT7 */
+    // 设置引脚复用为为中断
+    GPFCON &= ~(0x3 << 14);
+    GPFCON |= 0x2 << 14;
+
+    // 设置中断触发方式
+    EXTI->EXTINT0 &= ~(0x7 << 28);
+    // EXTI->EXTINT0 |= 0x0 << 28; /* 设置EINT7的信号触发方式，低电平 */
+    EXTI->EXTINT0 |= 0x1 << 28; /* 设置EINT7的信号触发方式，高电平 */
+
+    // 中断清除
+    EXTI->EINTPEND = 1 << 7; /* 向相应位置写1清除次级源挂起寄存器 */
+    SRCPND |= BIT_EINT4_7;   /* 向相应位置写1清除源挂起寄存器 */
+    INTPND |= BIT_EINT4_7;   /* 向相应位置写1清除挂起寄存器 */
+
+    // 使能中断
+    EXTI->EINTMASK &= ~(1 << 7); /* 关闭外部中断屏蔽 */
+    INTMSK &= ~BIT_EINT4_7;      /* 关闭EINT4~7中断屏蔽，总中断  */
+}
+
 /*
   Search DM9000 board, allocate space and register it
 */
@@ -122,6 +159,8 @@ int eth_init(void)
 {
     int i, oft;
     DM9000_DBG("eth_init()\r\n");
+
+    dm9k_io_init();
 
     /* RESET device */
     dm9000_reset();
@@ -187,9 +226,9 @@ int eth_init(void)
 
     /* Activate DM9000 */
     DM9000_iow(DM9000_RCR, RCR_DIS_LONG | RCR_DIS_CRC | RCR_RXEN); /* RX enable */
-    DM9000_iow(DM9000_IMR, IMR_PAR);                               /* Enable TX/RX interrupt mask */
+    DM9000_iow(DM9000_IMR, IMR_PAR);                        /* Enable TX/RX interrupt mask */
 
-	dm9k_pbuff_init();
+    dm9k_pbuff_init();
 
     return 0;
 }
@@ -300,6 +339,7 @@ void dm9k_pbuff_init(void)
             NetRxPackets[i] = NetTxPacket + (i + 1) * PKTSIZE_ALIGN;
         }
     }
+    printf("dm9k memp inited\r\n");
 }
 
 int eth_rx(void)
@@ -324,12 +364,12 @@ int eth_rx(void)
         {
             DM9000_iow(DM9000_RCR, 0x00); /* Stop Device */
             DM9000_iow(DM9000_ISR, 0x80); /* Stop INT request */
-            DM9000_DBG("rx status check: %d\n", rxbyte);
+            DM9000_DBG("rx status check: %d\r\n", rxbyte);
         }
         return 0;
     }
 
-    DM9000_DBG("receiving packet\n");
+    DM9000_DBG("receiving packet\r\n");
 
     /* A packet ready now  & Get status/length */
     DM9000_outb(DM9000_MRCMD, DM9000_IO);
@@ -350,7 +390,7 @@ int eth_rx(void)
     RxLen = tmpdata >> 16;
 
 #endif /*  */
-    DM9000_DBG("rx status: 0x%04x rx len: %d\n", RxStatus, RxLen);
+    DM9000_DBG("rx status: 0x%04x rx len: %d\r\n", RxStatus, RxLen);
 
     /* Move data from DM9000 */
     /* Read received packet from RX SRAM */
@@ -371,23 +411,25 @@ int eth_rx(void)
         ((u32 *)rdptr)[i] = DM9000_inl(DM9000_DATA);
 
 #endif /*  */
+    /* 清除中断请求 */
+    //DM9000_iow(DM9000_ISR, 0x0f); /* clear INT request */
     if ((RxStatus & 0xbf00) || (RxLen < 0x40) || (RxLen > DM9000_PKT_MAX))
     {
         if (RxStatus & 0x100)
         {
-            printf("rx fifo error\n");
+            printf("rx fifo error\r\n");
         }
         if (RxStatus & 0x200)
         {
-            printf("rx crc error\n");
+            printf("rx crc error\r\n");
         }
         if (RxStatus & 0x8000)
         {
-            printf("rx length error\n");
+            printf("rx length error\r\n");
         }
         if (RxLen > DM9000_PKT_MAX)
         {
-            printf("rx length too big\n");
+            printf("rx length too big\r\n");
             dm9000_reset();
         }
     }
@@ -395,8 +437,8 @@ int eth_rx(void)
     {
 
         /* Pass to upper layer */
-        DM9000_DBG("passing packet to upper layer\n");
-        //NetReceive(NetRxPackets[0], RxLen);
+        DM9000_DBG("passing packet to upper layer\r\n");
+        // NetReceive(NetRxPackets[0], RxLen);
         return RxLen;
     }
     return 0;
@@ -477,4 +519,3 @@ static void phy_write(int reg, u16 value)
     DM9000_iow(DM9000_EPCR, 0x0); /* Clear phyxcer write command */
     DM9000_DBG("phy_write(reg:%d, value:%d)\r\n", reg, value);
 }
-
