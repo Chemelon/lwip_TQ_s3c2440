@@ -15,6 +15,8 @@
 #include "projdefs.h"
 #include "task.h"
 
+#include "lwip/init.h"
+#include "lwip/timers.h"
 
 void task1(void *p)
 {
@@ -30,9 +32,10 @@ void task2(void *p)
 {
     for (;;)
     {
-        vTaskDelay(500);
+        //vTaskDelay(500);
         printf("task2\r\n");
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
+        sys_check_timeouts();
     }
 }
 
@@ -48,39 +51,41 @@ int main(void)
 {
     TaskHandle_t task1_handle, task2_handle;
     BaseType_t result = pdFALSE;
+    extern void dm9k_netif_init(void);
     // LED1-LED4对应的4根引脚设为输出
     GPBCON = GPB5_out | GPB6_out | GPB7_out | GPB8_out;
-
     uart0_init();
+    /* 打印编译时间 */
+    printf("\r\nBuild date:%s %s\r\n",__TIME__,__DATE__);
     exti_init();
     tim0_init();
-    //irq_init();
+    irq_init();
 
-    dm9k_init();
+    lwip_init();
+    dm9k_netif_init();
 
-    result = xTaskCreate(task1, "task1", 100, NULL, 2, &task1_handle);
+    //result = xTaskCreate(task1, "task1", 100, NULL, 2, &task1_handle);
     if (result != pdTRUE)
     {
         printf("task1 create error!\r\n");
     }
 
-    result = xTaskCreate(task2, "task2", 100, NULL, 2, &task2_handle);
+    //result = xTaskCreate(task2, "task2", 100, NULL, 2, &task2_handle);
     if (result != pdTRUE)
     {
         printf("task2 create error!\r\n");
     }
 
-    vTaskStartScheduler();
     if (result == pdTRUE)
     {
         vTaskStartScheduler();
     }
-    // lwip_init();
-    // dm9k_netif_init();
 
     while (1)
     {
-        HAL_Delay(1000);
+        HAL_Delay(100);
+        sys_check_timeouts();
+        //printf("running\r\n");
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
     }
     return 0;

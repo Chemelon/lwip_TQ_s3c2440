@@ -10,7 +10,7 @@ BUILD_DIR = build
 SRC_DIR = .
 
 # C sources
-# TODO: 缺少timers.c文件 与lwip中文件重名 待解决 croutine.c 和 stream_buffer.c 不知道干什么用的,先不添加
+# TODO: croutine.c 和 stream_buffer.c 不知道干什么用的,先不添加
 C_SOURCES = \
 event_groups.c \
 list.c \

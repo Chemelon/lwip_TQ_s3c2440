@@ -53,8 +53,6 @@ typedef unsigned int mem_ptr_t;
 #define BYTE_ORDER LITTLE_ENDIAN
 #endif
 
-extern unsigned int sys_now(void);
-
 //* 临界代码保护宏
 //#define	SYS_ARCH_DECL_PROTECT(x)	    //u32_t cpu_sr
 //#define	SYS_ARCH_PROTECT(x)			    //cpu_sr =

@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "lwip/sys.h"
 #include "s3c24xx.h"
 #include <stdio.h>
 
@@ -8,7 +9,7 @@ void tim4_init(void)
 {
     /* PCLK = 50Mhz */
     /* 50分频 计数周期1us devider 默认为2分频*/
-    TIMER->TCFG0 |= ((50 / 2) -1) << 8;
+    TIMER->TCFG0 |= ((50 / 2) - 1) << 8;
 
     TIMER->TCON |= 1 << 22;
 
@@ -20,7 +21,7 @@ void tim4_init(void)
     /* 开启中断 */
     INTMSK &= ~(1 << 14);
     /* 设置为FIQ */
-    INTMOD |= 1<<14;
+    INTMOD |= 1 << 14;
     /* 开启定时器 */
     TIMER->TCON |= 1 << 20;
 }
@@ -49,21 +50,25 @@ void tim4_handler(void)
 {
     uwTick += 1;
     /* FIQ 不影响INTOFFSET */
-    //SRCPND = 1 << 14;
+    // SRCPND = 1 << 14;
     // printf("timer irq\r\n");
 }
 
-/* TODO: 系统调度的时候会屏蔽中断,那么计时将不准确*/ 
+/* TODO: 系统调度的时候会屏蔽中断,那么计时将不准确*/
 void tim0_handler(void)
 {
     uwTick += 1;
     /* FIQ 不影响INTOFFSET */
-    //SRCPND = 1 << 14;
+    // SRCPND = 1 << 14;
     // printf("timer irq\r\n");
 }
 
 
-uint32_t HAL_GetTick(void) { return uwTick; }
+uint32_t HAL_GetTick(void)
+{
+    //printf("tick:%d", uwTick);
+    return uwTick;
+}
 /**
  * @brief This function provides minimum delay (in milliseconds) based
  *        on variable incremented.
@@ -89,3 +94,5 @@ void HAL_Delay(uint32_t Delay)
     {
     }
 }
+
+u32_t sys_now(void) { return HAL_GetTick(); }
