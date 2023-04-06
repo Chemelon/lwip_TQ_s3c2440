@@ -1,4 +1,5 @@
 #include "dm9000.h"
+#include "dm9000x.h"
 #include "exti.h"
 #include "irq.h"
 // #include "lwip/err.h"
@@ -45,6 +46,7 @@ unsigned char arpsendbuf[42] = {
     192,  168,  123,  3                 //接收端IP协议地址
 };
 
+extern volatile uint8_t exti_status;
 int main(void)
 {
     // LED1-LED4对应的4根引脚设为输出
@@ -62,13 +64,15 @@ int main(void)
 
     while (1)
     {
-extern volatile uint8_t exti_status;
-        // HAL_Delay(1000);
         if (exti_status == 1)
         {
-            ethernetif_input(&dm9k_netif);
             exti_status = 0;
+            //printf("got status\r\n");
+            ethernetif_input(&dm9k_netif);
+            /* 取消屏蔽外部中断 */
+            INTMSK &= ~(1 << 4);
         }
+        // HAL_Delay(1000);
         sys_check_timeouts();
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
     }

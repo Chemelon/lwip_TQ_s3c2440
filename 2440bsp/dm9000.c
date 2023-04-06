@@ -12,7 +12,7 @@
 #define CONFIG_DM9000_USE_16BIT
 
 /* #define CONFIG_DM9000_DEBUG */
-#define CONFIG_DM9000_DEBUG
+//#define CONFIG_DM9000_DEBUG
 
 typedef uint32_t u32;
 typedef uint16_t u16;
@@ -29,7 +29,7 @@ static uint16_t phy_read(int);
 static void phy_write(int, uint16_t);
 static uint8_t DM9000_ior(int);
 static int dm9000_probe(void);
-static void DM9000_iow(int reg, uint8_t value);
+//static void DM9000_iow(int reg, uint8_t value);
 // static u16 read_srom_word(int);	//HJ_del 20100528
 
 /* DM9000 network board routine ---------------------------- */
@@ -360,6 +360,7 @@ int eth_rx(void)
             DM9000_iow(DM9000_ISR, 0x80); /* Stop INT request */
             DM9000_DBG("rx status check: %d\r\n", rxbyte);
         }
+        DM9000_DBG("no packet: %d\r\n",rxbyte);
         return 0;
     }
 
@@ -467,7 +468,7 @@ static u8 DM9000_ior(int reg)
 /*
    Write a byte to I/O port
 */
-static void DM9000_iow(int reg, u8 value)
+void DM9000_iow(int reg, u8 value)
 {
     DM9000_outb(reg, DM9000_IO);
     DM9000_outb(value, DM9000_DATA);

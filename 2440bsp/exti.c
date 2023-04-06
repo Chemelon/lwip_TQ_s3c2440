@@ -1,5 +1,6 @@
 #include "exti.h"
 #include "dm9000.h"
+#include "dm9000x.h"
 #include "portmacro.h"
 #include "projdefs.h"
 #include "s3c24xx.h"
@@ -51,6 +52,10 @@ void exti4_7_handler(void)
     else if (EXTI->EINTPEND & (0x01 << 7))
     {
         exti_status = 1;
-        printf("exti7\r\n");
+        //printf("exti7\r\n");
+        /* 屏蔽中断4_7 */
+        INTMSK |= (1<<4);
+
+        EXTI->EINTPEND = 0x01 << 7;
     }
 }

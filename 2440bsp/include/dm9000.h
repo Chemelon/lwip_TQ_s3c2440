@@ -22,6 +22,7 @@ void eth_halt(void);
 void dump_regs(void);
 int eth_rx(void);
 int eth_send(volatile void *, int);
+void DM9000_iow(int reg, uint8_t value);
 
 /* 在ethernetif.c中 在此处声明方便调用 */
 extern struct netif dm9k_netif;
