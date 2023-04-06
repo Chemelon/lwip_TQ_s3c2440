@@ -18,27 +18,6 @@
 #include "lwip/init.h"
 #include "lwip/timers.h"
 
-void task1(void *p)
-{
-    for (;;)
-    {
-        vTaskDelay(1000);
-        printf("task1\r\n");
-        GPBDAT = (GPBDAT & (1 << 5)) ? (GPBDAT & ~(1 << 5)) : (GPBDAT | (1 << 5));
-    }
-}
-
-void task2(void *p)
-{
-    for (;;)
-    {
-        // vTaskDelay(500);
-        printf("task2\r\n");
-        GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
-        sys_check_timeouts();
-    }
-}
-
 /*
  * LED1-4对应GPB5、GPB6、GPB7、GPB8
  */
@@ -68,8 +47,6 @@ unsigned char arpsendbuf[42] = {
 
 int main(void)
 {
-    TaskHandle_t task1_handle, task2_handle;
-    //BaseType_t result = pdFALSE;
     // LED1-LED4对应的4根引脚设为输出
     GPBCON = GPB5_out | GPB6_out | GPB7_out | GPB8_out;
     uart0_init();
@@ -80,16 +57,18 @@ int main(void)
     irq_init();
 
     /* 从uboot中拷贝的初始化函数 */
-    //eth_init();
     lwip_init();
     dm9k_netif_init();
 
     while (1)
     {
-        //HAL_Delay(100);
-        //eth_send(arpsendbuf,42);
-        //printf("running\r\n");
-        ethernetif_input(&dm9k_netif);
+extern volatile uint8_t exti_status;
+        // HAL_Delay(1000);
+        if (exti_status == 1)
+        {
+            ethernetif_input(&dm9k_netif);
+            exti_status = 0;
+        }
         sys_check_timeouts();
         GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
     }

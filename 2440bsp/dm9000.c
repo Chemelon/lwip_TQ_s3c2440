@@ -25,25 +25,6 @@ typedef uint8_t u8;
 #define DM9000_DBG(fmt, args...)
 #endif /*  */
 
-/* Structure/enum declaration ------------------------------- */
-typedef struct board_info
-{
-    u32 runt_length_counter; /* counter: RX length < 64byte */
-    u32 long_length_counter; /* counter: RX length > 1514byte */
-    u32 reset_counter;       /* counter: RESET */
-    u32 reset_tx_timeout;    /* RESET caused by TX Timeout */
-    u32 reset_rx_status;     /* RESET caused by RX Statsus wrong */
-    u16 tx_pkt_cnt;
-    u16 queue_start_addr;
-    u16 dbug_cnt;
-    u8 phy_addr;
-    u8 device_wait_reset; /* device state */
-    u8 nic_type;          /* NIC type */
-    u8 chip_ver;
-    unsigned char srom[128];
-} board_info_t;
-board_info_t dmfe_info;
-
 static uint16_t phy_read(int);
 static void phy_write(int, uint16_t);
 static uint8_t DM9000_ior(int);
@@ -117,7 +98,6 @@ void dm9k_io_init(void)
 */
 int dm9000_probe(void)
 {
-    struct board_info *db = &dmfe_info; /* Point a board information structure */
     u32 id_val;
 
     id_val = DM9000_ior(DM9000_VIDL);
@@ -127,9 +107,6 @@ int dm9000_probe(void)
     if (id_val == DM9000_ID)
     {
         printf("dm9000 i/o: 0x%x, id: 0x%x \r\n", CONFIG_DM9000_BASE, id_val);
-        db->nic_type = DM9000_ior(DM9000_ISR) >> 6;
-        db->chip_ver = DM9000_ior(0x2c);
-
         return 0;
     }
     else
@@ -162,11 +139,11 @@ int eth_init(void)
 
     dm9k_io_init();
 
+    DM9000_iow(DM9000_GPCR, 0x01);
+    DM9000_iow(DM9000_GPR, 0x00);
+
     /* RESET device */
     dm9000_reset();
-
-    DM9000_iow(DM9000_GPCR, 0x01);
-    DM9000_iow(DM9000_GPR, 0);
 
     i = 100;
     do
@@ -180,7 +157,8 @@ int eth_init(void)
     if (dm9000_probe() < 0)
         return -1;
 
-    //	phy_write(0x04, 0x00a1);
+    /* Auto-negotiation */
+    phy_write(0x04, 0x00a1);
     phy_write(0x00, 0x1200);
 
     dm9000_reset();
@@ -199,19 +177,6 @@ int eth_init(void)
 
     DM9000_iow(DM9000_SMCR, 0); /* Special Mode */
 
-    /* Set Node address */
-    // HJ_start				/*   www.embedsky.net   */
-    // char *tmp = getenv("ethaddr");
-    // char *end;
-
-    for (i = 0; i < 6; i++)
-    {
-        // bd->bi_enetaddr[i] = tmp ? simple_strtoul(tmp, &end, 16) : 0;
-        // if (tmp)
-        //    tmp = (*end) ? end + 1 : end;
-    }
-    // HJ_end				/*   www.embedsky.net   */
-
     printf("MAC: %02x:%02x:%02x:%02x:%02x:%02x\r\n", bi_enetaddr[0], bi_enetaddr[1], bi_enetaddr[2], bi_enetaddr[3],
            bi_enetaddr[4], bi_enetaddr[5]);
     for (i = 0, oft = 0x10; i < 6; i++, oft++)
@@ -224,9 +189,33 @@ int eth_init(void)
         DM9000_DBG("%02x:", DM9000_ior(oft));
     DM9000_DBG("\r\n");
 
+    for (uint32_t tmo = HAL_GetTick() + 3000;;)
+    {
+        if (tmo > HAL_GetTick())
+        {
+            /* 检查link ok */
+            if ((DM9000_ior(DM9000_NSR) & (0x01 << 6)) == 0x01)
+            {
+                break;
+            }
+        }
+        else
+        {
+#ifdef CONFIG_DM9000_DEBUG
+            dump_regs();
+#endif
+            printf("check linkup timeout\r\n");
+            break;
+        }
+    }
+
+    DM9000_iow(DM9000_NSR, 0x2c); //清除各种状态标志位
+    DM9000_iow(DM9000_ISR, 0x0f); //清除所有中断标志位
+
     /* Activate DM9000 */
     DM9000_iow(DM9000_RCR, RCR_DIS_LONG | RCR_DIS_CRC | RCR_RXEN); /* RX enable */
-    DM9000_iow(DM9000_IMR, IMR_PAR);                        /* Enable TX/RX interrupt mask */
+    /* 开启接收中断 */
+    DM9000_iow(DM9000_IMR, IMR_PAR | 0x01);
 
     dm9k_pbuff_init();
 
@@ -242,14 +231,10 @@ int eth_send(volatile void *packet, int length)
     char *data_ptr;
     u32 tmplen, i;
     int tmo;
+    /* 关闭dm9k中断请求 */
+    DM9000_iow(DM9000_IMR, IMR_PAR);
+
     DM9000_DBG("eth_send: length: %d\r\n", length);
-    // for (i = 0; i < length; i++)
-    // {
-    //     if (i % 8 == 0)
-    //         DM9000_DBG("\r\nSend: %02x: ", i);
-    //     DM9000_DBG("%02x ", ((unsigned char *)packet)[i]);
-    // }
-    // DM9000_DBG("\n");
 
     /* Move data to DM9000 TX RAM */
     data_ptr = (char *)packet;
@@ -282,16 +267,23 @@ int eth_send(volatile void *packet, int length)
     DM9000_iow(DM9000_TCR, TCR_TXREQ); /* Cleared after TX complete */
 
     /* wait for end of transmission */
-    tmo = HAL_GetTick() + 200;
+    tmo = HAL_GetTick() + 500;
     while (DM9000_ior(DM9000_TCR) & TCR_TXREQ)
     {
         if (HAL_GetTick() >= tmo)
         {
+#ifdef CONFIG_DM9000_DEBUG
+            dump_regs();
+#endif
             printf("transmission timeout\r\n");
             break;
         }
     }
     DM9000_DBG("transmit done\r\n");
+
+    /* 开启dm9k接收中断 */
+    DM9000_iow(DM9000_IMR, IMR_PAR | 0x01);
+
     return 0;
 }
 
@@ -355,6 +347,8 @@ int eth_rx(void)
     /* Check packet ready or not */
     DM9000_ior(DM9000_MRCMDX); /* Dummy read */
     save_mrr = (DM9000_ior(0xf5) << 8) | DM9000_ior(0xf4);
+    DM9000_DBG("read inertnal add=%04x\r\n", save_mrr);
+
     rxbyte = DM9000_ior(DM9000_MRCMDX); /* Got most updated data */
 
     if (rxbyte != 1)
@@ -411,8 +405,6 @@ int eth_rx(void)
         ((u32 *)rdptr)[i] = DM9000_inl(DM9000_DATA);
 
 #endif /*  */
-    /* 清除中断请求 */
-    //DM9000_iow(DM9000_ISR, 0x0f); /* clear INT request */
     if ((RxStatus & 0xbf00) || (RxLen < 0x40) || (RxLen > DM9000_PKT_MAX))
     {
         if (RxStatus & 0x100)
@@ -432,13 +424,17 @@ int eth_rx(void)
             printf("rx length too big\r\n");
             dm9000_reset();
         }
+        /* 清除中断请求 */
+        DM9000_iow(DM9000_ISR, 0x0f); /* clear INT request */
     }
     else
     {
 
         /* Pass to upper layer */
         DM9000_DBG("passing packet to upper layer\r\n");
-        // NetReceive(NetRxPackets[0], RxLen);
+        /* 清除中断请求 */
+        DM9000_iow(DM9000_ISR, 0x0f); /* clear INT request */
+
         return RxLen;
     }
     return 0;
@@ -506,7 +502,7 @@ static void phy_write(int reg, u16 value)
 {
 
     /* Fill the phyxcer register into REG_0C */
-    DM9000_iow(DM9000_EPAR, DM9000_PHY | reg);
+    DM9000_iow(DM9000_EPAR, DM9000_PHY | (reg & 0x3f));
 
     /* Fill the written data into REG_0D & REG_0E */
     DM9000_iow(DM9000_EPDRL, (value & 0xff));
@@ -517,5 +513,5 @@ static void phy_write(int reg, u16 value)
         HAL_Delay(1); /* Wait write complete */
     } while (0x0a != DM9000_ior(DM9000_EPCR));
     DM9000_iow(DM9000_EPCR, 0x0); /* Clear phyxcer write command */
-    DM9000_DBG("phy_write(reg:%d, value:%d)\r\n", reg, value);
+    DM9000_DBG("phy_write(reg:%d, value:%04x)\r\n", reg, value);
 }

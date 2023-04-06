@@ -104,19 +104,19 @@ static void low_level_init(struct netif *netif)
     netif->hwaddr[1] = 0x01;
     netif->hwaddr[2] = 0x02;
     netif->hwaddr[3] = 0x0f;
-    netif->hwaddr[4] = 0x03;
+    netif->hwaddr[4] = 0x0e;
     netif->hwaddr[5] = 0x0d;
 
     /* maximum transfer unit */
     netif->mtu = 1500;
+
+    eth_init();
 
     /* device capabilities */
     /* don't set NETIF_FLAG_ETHARP if this device is not an ethernet one */
     netif->flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_LINK_UP;
 
     /* Do whatever else is needed to initialize interface. */
-    // dm9k_init();
-    eth_init();
 }
 
 /**
@@ -367,7 +367,7 @@ void dm9k_netif_init(void)
 {
     struct ip_addr ipaddr, netmask, gw;
 
-    IP4_ADDR(&gw, 192, 168, 123, 1);
+    IP4_ADDR(&gw, 192, 168, 123, 3);
     IP4_ADDR(&ipaddr, 192, 168, 123, 200);
     IP4_ADDR(&netmask, 255, 255, 255, 0);
 

@@ -21,6 +21,7 @@ OPT = -O0
 # Build path
 BUILD_DIR = build
 SUB_DIRS = 2440bsp FreeRTOS-Kernel lwip-1.4.1
+# SUB_DIRS = 2440bsp lwip-1.4.1
 
 #######################################
 # binaries

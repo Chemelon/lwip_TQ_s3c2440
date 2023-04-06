@@ -1,10 +1,14 @@
 #include "exti.h"
 #include "dm9000.h"
+#include "portmacro.h"
+#include "projdefs.h"
 #include "s3c24xx.h"
 #include <stdio.h>
+#include <sys/_stdint.h>
 
 #include "lwip/netif.h"
 
+volatile uint8_t exti_status = 0;
 
 void exti_init(void)
 {
@@ -46,8 +50,7 @@ void exti4_7_handler(void)
     }
     else if (EXTI->EINTPEND & (0x01 << 7))
     {
-        //ethernetif_input(&dm9k_netif);
+        exti_status = 1;
         printf("exti7\r\n");
-        EXTI->EINTPEND = 0x01 << 7;
     }
 }

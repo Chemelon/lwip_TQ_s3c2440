@@ -33,7 +33,7 @@ void tim0_init(void)
     /* auto reload */
     TIMER->TCON |= 1 << 3;
 
-    TIMER->TCNTB0 = 1000;
+    TIMER->TCNTB0 = 100;
     /* mannul update */
     TIMER->TCON |= 1 << 1;
 
