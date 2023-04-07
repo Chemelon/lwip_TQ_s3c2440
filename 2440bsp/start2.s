@@ -29,7 +29,7 @@ HandleIRQ:
     sub lr, lr, #4 @ 计算返回地址
     stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
                             @ 注意,此时sp是中断模式的sp
-                            @ 初始值是上面设置的3072
+                            
     ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
     ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
 
@@ -39,7 +39,7 @@ HandleFIQ:
     sub lr, lr, #4 @ 计算返回地址
     stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
                             @ 注意,此时sp是中断模式的sp
-                            @ 初始值是上面设置的3072
+                            
     ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
     ldr pc, = fiq_handle    @ 调用中断服务函数,在irq.c中
 

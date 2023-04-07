@@ -8,4 +8,5 @@ gdbinit
 .vscode/
 .cache/
 build/
+2440fw/
 FreeRTOS-Plus-TCP/
