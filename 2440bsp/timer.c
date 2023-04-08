@@ -13,7 +13,7 @@ void tim4_init(void)
 
     TIMER->TCON |= 1 << 22;
 
-    TIMER->TCNTB4 = 1000;
+    TIMER->TCNTB4 = 2000;
     /* mannul update */
     TIMER->TCON |= 1 << 21;
 
@@ -33,7 +33,7 @@ void tim0_init(void)
     /* auto reload */
     TIMER->TCON |= 1 << 3;
 
-    TIMER->TCNTB0 = 100;
+    TIMER->TCNTB0 = 50000;
     /* mannul update */
     TIMER->TCON |= 1 << 1;
 

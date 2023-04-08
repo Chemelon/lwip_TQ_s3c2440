@@ -26,28 +26,26 @@ HandleNotUsed:
     b HandleFIQ
 
 HandleIRQ:
-    sub lr, lr, #4 @ 计算返回地址
     stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
                             @ 注意,此时sp是中断模式的sp
                             
     ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
     ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
+    b .
 
 HandleFIQ:
-    ldr pc, = vTickISR
 @ 直接跳转到FreeRTOS的函数中,不会执行下面的代码
-    sub lr, lr, #4 @ 计算返回地址
-    stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
-                            @ 注意,此时sp是中断模式的sp
-                            
-    ldr lr, = int_return    @ 设置调用ISR即EINT_Handle函数后的返回地址
-    ldr pc, = fiq_handle    @ 调用中断服务函数,在irq.c中
+    ldr pc, = vTickISR
+    b .
 
 HandleSWI:
     ldr pc, = vPortYieldProcessor
+    b .
 
 int_return:
-    ldmia sp!, {r0-r12,pc}^  @中断返回,^表示将spsr的值复制到cpsr
+    ldmia sp!, {r0-r12,lr}  @中断返回
+    subs pc, lr, #4 @ 计算返回地址
+    b .
 
 reset:
 /*关看门狗*/
@@ -97,21 +95,21 @@ reset:
     str r3, [r0]
     
     ldr r0, = 0x56000014    @ GPBDAT
-    ldr r1, = 0x000001E1    @ LED1 LED2 OFF 响证明sdram没问题
+    ldr r1, = 0x000001E0    @ LED1 LED2 OFF 响证明sdram没问题
     str r1, [r0]
 /************************************************/
 @ 设置中断函数栈指针
     msr cpsr_c, #0xd2       @ 进入中断模式
-    ldr sp, =4096
+    ldr sp, =0x34000000
     msr cpsr_c, #0xd1       @ 进入快中断模式
-    ldr sp, =4096
+    ldr sp, =0x33FF6000
     msr cpsr_c, #0xd3       @ 进入管理模式
-    ldr sp, =4096
+    ldr sp, =0x33FEC000
     msr cpsr_c, #0xdf       @ 进入系统模式
 
 /************************************************/
 /*重定位 把bootloader 从FLASH 复制到它的链接地址去*/
-    ldr sp, =0x34000000     @ 设置栈
+    ldr sp, =0x33FE2000     @ 设置栈
 
     bl nand_init
 
