@@ -23,7 +23,40 @@ HandleNotUsed:
     b HandleIRQ
 
 @ 调用FreeRTOS的中断函数 切换上下文
-    b HandleFIQ
+@    b HandleFIQ
+@ HandleFIQ:
+@ 直接跳转到FreeRTOS的函数中,不会执行下面的代码
+@ 在irq执行以及swi执行过程中不要调度任务
+@ 如果irq或者swi被打断,则spsr_fiq中保存的就是对应中断模式的spsr(spsr_irq\spsr_swi)
+    stmdb sp!, {r0-r12,lr}
+    @ 读取spsr
+    mrs	r12, spsr
+    and r12, r12, #0x0f
+    ldr r11, =#0x0f
+    @ 检测是否是系统模式
+    cmp r12, r11
+    bne PendSwitch
+    @ 是系统模式则执行上下文切换
+    @ ldmia sp!, {r0-r12,lr}
+    ldr pc, = vTickISR
+
+PendSwitch:
+    @ mov r0, lr
+    @ sub lr, pc, #0
+    @ ldr pc, =puthex
+    @ mrs	r0, spsr
+    @ sub lr, pc, #0
+    @ ldr pc, =puthex
+
+    @ DEBUG : 清除SRCPND
+    ldr r0, =#0x4A000000
+    ldr r1, =#1<<14
+    str r1, [r0]
+    @ TODO : 在irq执行完后执行上下文切换
+    ldmia sp!, {r0-r12,lr}
+    subs pc, lr, #4
+
+
 
 HandleIRQ:
     stmdb sp!, {r0-r12,lr}  @ 保存使用到的寄存器
@@ -33,13 +66,8 @@ HandleIRQ:
     ldr pc, = irq_handle    @ 调用中断服务函数,在irq.c中
     b .
 
-HandleFIQ:
-@ 直接跳转到FreeRTOS的函数中,不会执行下面的代码
-    ldr pc, = vTickISR
-    b .
-
 HandleSWI:
-    ldr pc, = vPortYieldProcessor
+    @ ldr pc, = vPortYieldProcessor
     b .
 
 int_return:
@@ -49,12 +77,12 @@ int_return:
 
 reset:
 /*关看门狗*/
-    ldr r0, =0x53000000 @WTCON
+    ldr r0, =#0x53000000 @WTCON
     mov r1, #0
     str r1, [r0]
 
 /*设置时钟*/
-    ldr r0, =0x4c000014 @ CLKDIVN
+    ldr r0, =#0x4c000014 @ CLKDIVN
     mov r1, #0x05
     @ mov r1, #0x05   @ FCLK:HCLK:PCLK = 1:4:8 ←----------
     str r1, [r0]
@@ -66,7 +94,7 @@ reset:
     mcr p15, 0, r0, c1, c0, 0        /* 写入控制寄存器 */
 
     /*MPLLCON = S3C2440_MPLL_400MHZ*/
-    ldr r0, =0x4c000004 @ MPLLCON
+    ldr r0, =#0x4c000004 @ MPLLCON
     ldr r1, =S3C2440_MPLL_400MHZ    @ ←----------
     str r1, [r0]
 
@@ -87,15 +115,16 @@ reset:
 
 /************************************************/
     @ 对sdram读写测试sdram是否成功初始化
-    ldr r0, = 0x56000010    @ GPBCON
-    ldr r1, = 0x00015401    @ GPB0 GPB5 GPB6 OUT
-    ldr r2, = 0x30000000
+    ldr r0, = #0x56000010    @ GPBCON
+    ldr r1, = #0x00015401    @ GPB0 GPB5 GPB6 OUT
+    ldr r2, = #0x30000000
     str r1, [r2] @ 存到内存0x30000000里
     ldr r3, [r2]
     str r3, [r0]
     
-    ldr r0, = 0x56000014    @ GPBDAT
-    ldr r1, = 0x000001E0    @ LED1 LED2 OFF 响证明sdram没问题
+    ldr r0, = #0x56000014    @ GPBDAT
+    @ ldr r1, = 0x000001E1    @ LED1 LED2 OFF 响证明sdram没问题
+    ldr r1, = #0x000001E0    @ LED1 LED2 OFF 响证明sdram没问题
     str r1, [r0]
 /************************************************/
 @ 设置中断函数栈指针
@@ -121,8 +150,8 @@ reset:
     bl copy_code_to_sdram
     bl clean_bss
 /************************************************/
-    ldr r0, = 0x56000014    @ GPBDAT
-    ldr r1, = 0x00000000    @ LED1 LED2 on 不响证明拷贝完毕
+    ldr r0, = #0x56000014    @ GPBDAT
+    ldr r1, = #0x00000000    @ LED1 LED2 on 不响证明拷贝完毕
     str r1, [r0]
 /************************************************/
 

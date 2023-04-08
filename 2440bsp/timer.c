@@ -33,7 +33,7 @@ void tim0_init(void)
     /* auto reload */
     TIMER->TCON |= 1 << 3;
 
-    TIMER->TCNTB0 = 50000;
+    TIMER->TCNTB0 = 1000;
     /* mannul update */
     TIMER->TCON |= 1 << 1;
 
@@ -60,7 +60,7 @@ void tim0_handler(void)
     uwTick += 1;
     /* FIQ 不影响INTOFFSET */
     // SRCPND = 1 << 14;
-    // printf("timer irq\r\n");
+    printf("timer0 irq\r\n");
 }
 
 

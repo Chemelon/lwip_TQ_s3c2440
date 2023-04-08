@@ -30,7 +30,7 @@ void irq_handle(void)
 {
     // uint32_t irqNumber = ffs(INTPND) - 1;
     uint32_t irqNumber = INTOFFSET;
-    printf("IRQ%d \r\n", (int)irqNumber);
+    //printf("IRQ%d \r\n", (int)irqNumber);
 
     /* 根据偏移量从数组中调用对应中断服务函数 */
     p_irqList[irqNumber]();

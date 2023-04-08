@@ -17,9 +17,6 @@
 
 //#define configMAX_PRIORITIES 2
 
-/* 抢占式调度 */
-#define configUSE_PREEMPTION 1
-
 #define configUSE_IDLE_HOOK 0
 
 #define configUSE_TICK_HOOK 0
@@ -53,7 +50,8 @@ your application. */
 #define configUSE_ALTERNATIVE_API               0 /* Deprecated! */
 #define configQUEUE_REGISTRY_SIZE               10
 #define configUSE_QUEUE_SETS                    0
-#define configUSE_TIME_SLICING                  0
+/* 同级任务轮流执行 */
+#define configUSE_TIME_SLICING                  1
 #define configUSE_NEWLIB_REENTRANT              0
 #define configENABLE_BACKWARD_COMPATIBILITY     0
 #define configNUM_THREAD_LOCAL_STORAGE_POINTERS 5
@@ -136,10 +134,10 @@ your application. */
 #define configRECORD_STACK_HIGH_ADDRESS 1
 
 
-// #define traceTASK_SWITCHED_IN()                                 \
-// do                                                              \
-// {                                                               \
-//     printf("swich in:%s\r\n",pxCurrentTCB->pcTaskName);         \
+// #define traceTASK_SWITCHED_IN()                                 
+// do                                                              
+// {                                                               
+//     printf("swich in:%s\r\n",pxCurrentTCB->pcTaskName);         
 // }while(0);
 
 #endif /* FREERTOS_CONFIG_H */

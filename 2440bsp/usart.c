@@ -101,4 +101,5 @@ void puthex(unsigned int val)
         else
             uart0_sendbyte('A' + j - 0x0a);
     }
+    _write(0,"\r\n",2);
 }

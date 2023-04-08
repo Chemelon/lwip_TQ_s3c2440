@@ -78,9 +78,9 @@ void vPortISRStartFirstTask( void );
 
 void vPortISRStartFirstTask( void )
 {
-	/* 进入管理模式 特权级 */
+	/* 进入快中断模式 特权级 */
 	__asm__ __volatile__ (
-		"msr cpsr_c, #0xd3 \n"
+		"msr cpsr_c, #0xd1 \n"
 	);
 	/* Simply start the scheduler.  This is included here as it can only be
 	called from ARM mode. */
