@@ -56,8 +56,8 @@ void LwipTimerTask(void *p)
         vPortEnterCritical();
         printf("LwipTimerTask running\r\n");
         vPortExitCritical();
-        // HAL_Delay(500);
-        // vTaskDelay(500);
+        //HAL_Delay(500);
+        vTaskDelay(500 / portTICK_PERIOD_MS);
         // sys_check_timeouts();
     }
 }
@@ -96,12 +96,12 @@ void LEDTask(void *p)
         printf("LEDTask running\r\n");
         vPortExitCritical();
 
-        // vTaskDelay(500);
-        // HAL_Delay(500);
-        // GPBDAT = (GPBDAT & (1 << 5)) ? (GPBDAT & ~(1 << 5)) : (GPBDAT | (1 << 5));
-        // GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
-        // GPBDAT = (GPBDAT & (1 << 7)) ? (GPBDAT & ~(1 << 7)) : (GPBDAT | (1 << 7));
-        // GPBDAT = (GPBDAT & (1 << 8)) ? (GPBDAT & ~(1 << 8)) : (GPBDAT | (1 << 8));
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+        //HAL_Delay(500);
+        GPBDAT = (GPBDAT & (1 << 5)) ? (GPBDAT & ~(1 << 5)) : (GPBDAT | (1 << 5));
+        GPBDAT = (GPBDAT & (1 << 6)) ? (GPBDAT & ~(1 << 6)) : (GPBDAT | (1 << 6));
+        GPBDAT = (GPBDAT & (1 << 7)) ? (GPBDAT & ~(1 << 7)) : (GPBDAT | (1 << 7));
+        GPBDAT = (GPBDAT & (1 << 8)) ? (GPBDAT & ~(1 << 8)) : (GPBDAT | (1 << 8));
     }
 }
 
@@ -130,11 +130,6 @@ BaseType_t Init_Task(void *p)
     return result;
 }
 
-void info_task(uint32_t reg)
-{
-    printf("pended!%08x\r\n", reg);
-}
-
 extern volatile uint8_t exti_status;
 int main(void)
 {
@@ -144,7 +139,7 @@ int main(void)
     /* 打印编译时间 */
     printf("\r\nBuild date:%s %s\r\n", __TIME__, __DATE__);
     exti_init();
-    tim0_init();
+    //tim0_init();
     // irq_init();
 
     // result = xTaskCreate(Init_Task, "InitTask", 100, NULL, 4, &Init_TaskHandle);

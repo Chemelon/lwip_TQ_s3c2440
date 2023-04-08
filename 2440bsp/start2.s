@@ -47,6 +47,9 @@ PendSwitch:
     @ mrs	r0, spsr
     @ sub lr, pc, #0
     @ ldr pc, =puthex
+    @ 保持tick准确
+    sub lr, pc, #0
+    ldr pc, =xTaskIncrementTick
 
     @ DEBUG : 清除SRCPND
     ldr r0, =#0x4A000000
@@ -67,7 +70,7 @@ HandleIRQ:
     b .
 
 HandleSWI:
-    @ ldr pc, = vPortYieldProcessor
+    ldr pc, = vPortYieldProcessor
     b .
 
 int_return:

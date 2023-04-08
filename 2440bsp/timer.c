@@ -60,7 +60,7 @@ void tim0_handler(void)
     uwTick += 1;
     /* FIQ 不影响INTOFFSET */
     // SRCPND = 1 << 14;
-    printf("timer0 irq\r\n");
+    //printf("timer0 irq\r\n");
 }
 
 
